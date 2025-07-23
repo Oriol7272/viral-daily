@@ -1,6 +1,9 @@
+print(">>> Entrando en src.main")
+
+# src/main.py
 # src/main.py
 from dotenv import load_dotenv
-load_dotenv()                                 # ← carga las variables de .env
+load_dotenv()                                 # carga las variables de .env
 
 from youtube_popular import fetch_trending_videos
 from instagram_scraper_with_session import fetch_instagram_reels_with_session
@@ -37,4 +40,15 @@ def send_email(path: str) -> None:
         smtp.login(user, pwd)
         smtp.send_message(msg)
         print("📧  Correo enviado a", to)
+
+
+if __name__ == "__main__":
+    print(">>> Ejecutando main")                 # debug
+    yt = fetch_trending_videos()
+    ig = fetch_instagram_reels_with_session()
+    tk = fetch_tiktok_trending()
+
+    print(">> debug len:", len(yt), len(ig), len(tk))
+    build_html({"YouTube": yt, "Instagram": ig, "TikTok": tk})
+    send_email("viral_daily.html")
 
