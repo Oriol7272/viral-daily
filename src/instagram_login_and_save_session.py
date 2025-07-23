@@ -1,38 +1,16 @@
-import json
-import os
-from playwright.sync_api import sync_playwright
+import json,os
+from pathlib import Path
 from dotenv import load_dotenv
-
-load_dotenv()
-
+from playwright.sync_api import sync_playwright
+load_dotenv(Path(__file__).resolve().parent.parent/".env")
 def save_instagram_session():
-    username = os.getenv("INSTAGRAM_USERNAME")
-    password = os.getenv("INSTAGRAM_PASSWORD")
-
-    if not username or not password:
-        print("❌ Falta usuario o contraseña de Instagram en el archivo .env")
-        return
-
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=False)
-        context = browser.new_context()
-        page = context.new_page()
-        page.goto("https://www.instagram.com/accounts/login/", timeout=60000)
-
-        page.wait_for_selector("input[name='username']")
-        page.fill("input[name='username']", username)
-        page.fill("input[name='password']", password)
-        page.click("button[type='submit']")
-
-        page.wait_for_timeout(10000)  # Espera a que inicie sesión
-
-        cookies = context.cookies()
-        with open("instagram_session.json", "w") as f:
-            json.dump(cookies, f)
-
-        print("✅ Sesión guardada en instagram_session.json")
-        browser.close()
-
-if __name__ == "__main__":
-    save_instagram_session()
-
+    u=os.getenv("INSTAGRAM_USERNAME"); p=os.getenv("INSTAGRAM_PASSWORD")
+    if not u or not p: print("❌ Falta INSTAGRAM_USERNAME/PASSWORD"); return
+    with sync_playwright() as pw:
+        br=pw.chromium.launch(headless=False); ctx=br.new_context(); pg=ctx.new_page()
+        pg.goto("https://www.instagram.com/accounts/login/"); pg.wait_for_selector("input[name='username']")
+        pg.fill("input[name='username']",u); pg.fill("input[name='password']",p); pg.click("button[type='submit']")
+        pg.wait_for_timeout(10000)
+        json.dump(ctx.cookies(),open("instagram_session.json","w"))
+        print("✅ Sesión guardada"); br.close()
+if __name__=="__main__": save_instagram_session()

@@ -2,4 +2,4 @@ viral-env/
 __pycache__/
 *.pyc
 .env
-.env
+instagram_session.json

@@ -1,22 +1,12 @@
-# src/youtube_popular.py
-
-def fetch_trending_videos():
-    print("🔍 Buscando vídeos virales en YouTube...")
-
-    # Aquí puedes integrar la API real si lo deseas
-    # Por ahora retornamos una lista simulada
-    trending_videos = [
-        "https://www.youtube.com/watch?v=abc123",
-        "https://www.youtube.com/watch?v=def456",
-        "https://www.youtube.com/watch?v=ghi789",
-        "https://www.youtube.com/watch?v=jkl012",
-        "https://www.youtube.com/watch?v=mno345",
-        "https://www.youtube.com/watch?v=pqr678",
-        "https://www.youtube.com/watch?v=stu901",
-        "https://www.youtube.com/watch?v=vwx234",
-        "https://www.youtube.com/watch?v=yz5678",
-        "https://www.youtube.com/watch?v=zzz999"
-    ]
-
-    return trending_videos
-
+from googleapiclient.discovery import build
+import os
+API_KEY=os.getenv("YOUTUBE_API_KEY")
+service=build("youtube","v3",developerKey=API_KEY)
+def fetch_trending_videos(limit=10):
+    res=service.videos().list(part="snippet",chart="mostPopular",regionCode="ES",maxResults=limit).execute()
+    vids=[]
+    for i in res["items"]:
+        vids.append({"url":f"https://www.youtube.com/watch?v={i['id']}",
+                     "title":i["snippet"]["title"],
+                     "thumb":i["snippet"]["thumbnails"]["high"]["url"]})
+    return vids
