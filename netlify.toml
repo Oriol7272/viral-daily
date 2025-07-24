@@ -9,4 +9,5 @@
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Security-Policy = "default-src 'self'; img-src 'self' https://*.tiktokcdn.com https://i.ytimg.com https://via.placeholder.com; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
+    Content-Security-Policy = "default-src 'self'; img-src 'self' https://*.tiktokcdn.com https://*.tiktokcdn-eu.com https://*.tiktokcdn-us.com https://i.ytimg.com https://via.placeholder.com; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' 'unsafe-inline'"
+
