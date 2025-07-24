@@ -1,4 +1,4 @@
-#!/bin/bash
+x#!/bin/bash
 source ~/viral-daily/viral-env/bin/activate
 echo "⏰ Ejecutando rutina diaria..."
 python3 src/youtube_popular.py

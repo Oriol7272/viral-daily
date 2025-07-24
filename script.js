@@ -43,6 +43,7 @@ async function fetchYouTubeVideos() {
             <div class="video" data-platform="youtube">
                 <a href="${item.url}">${item.title}</a>
                 <img src="${item.thumb}" alt="Thumbnail">
+                <p class="affiliate-link"><a href="https://amzn.to/your-affiliate-link?tag=your-id">Buy related product on Amazon</a></p>
             </div>
         `).join('');
         return data.length;
@@ -62,6 +63,7 @@ async function fetchTikTokVideos() {
             <div class="video" data-platform="tiktok">
                 <a href="${video.url}">${video.title}</a>
                 <img src="${video.thumb}" alt="Thumbnail">
+                <p class="affiliate-link"><a href="https://amzn.to/your-affiliate-link?tag=your-id">Buy related product on Amazon</a></p>
             </div>
         `).join('');
         return data.length;
@@ -69,6 +71,12 @@ async function fetchTikTokVideos() {
         console.error('Error fetching TikTok videos from JSON:', error);
         return 10; // Fallback a videos estáticos
     }
+}
+
+// Función para suscribirse (placeholder para Stripe)
+function subscribe() {
+    alert('Redirecting to subscription page...');
+    window.location.href = 'https://buy.stripe.com/your-checkout-link'; // Replace with your Stripe link
 }
 
 // Función para filtrar videos
