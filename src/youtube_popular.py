@@ -1,34 +1,34 @@
-import os
-from dotenv import load_dotenv
-from googleapiclient.discovery import build
+mport requests
+from bs4 import BeautifulSoup
+import json
 
-# Cargar clave API de entorno
-load_dotenv()
-api_key = os.getenv("YOUTUBE_API_KEY")
+def scrape_youtube_popular():
+url = "https://www.youtube.com/feed/trending"
+headers = {
+"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+}
+response = requests.get(url, headers=headers)
+if response.status_code != 200:
+print("Failed to fetch YouTube trending page")
+return []
 
-if not api_key:
-    raise ValueError("API Key de YouTube no encontrada")
+soup = BeautifulSoup(response.text, 'html.parser')
+videos = []
+script_tags = soup.find_all('script')
+for script in script_tags:
+if 'var ytInitialData = ' in script.string:
+data_str = script.string.split('var ytInitialData = ')[1].rstrip(';')
+data = json.loads(data_str)
+contents = data['contents']['twoColumnBrowseResultsRenderer']['tabs'][0]['tabRenderer']['content']['sectionListRenderer']['contents'][0]['itemSectionRenderer']['contents']
+for content in contents:
+if 'videoRenderer' in content:
+video = content['videoRenderer']
+title = video['title']['runs'][0]['text']
+url = "https://www.youtube.com/watch?v=" + video['videoId']
+videos.append({'title': title, 'url': url})
+break
+return videos
 
-# Cliente de API
-youtube = build("youtube", "v3", developerKey=api_key)
-
-def get_top_videos(region="ES", max_results=10):
-    request = youtube.videos().list(
-        part="snippet,statistics",
-        chart="mostPopular",
-        regionCode=region,
-        maxResults=max_results
-    )
-    return request.execute().get("items", [])
-
-if __name__ == "__main__":
-    print("⏳ Obteniendo vídeos virales de YouTube...")
-    try:
-        videos = get_top_videos()
-        for i, v in enumerate(videos, 1):
-            title = v['snippet']['title']
-            likes = v['statistics'].get('likeCount', 'N/A')
-            print(f"{i}. {title} (👍 {likes})")
-    except Exception as e:
-        print("❌ Error al obtener vídeos:", e)
-
+if name == "main":
+videos = scrape_youtube_popular()
+print(videos)

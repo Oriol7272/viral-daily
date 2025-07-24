@@ -1,4 +1,16 @@
 [build]
+publish = "."
+command = ""
+functions = "functions"
+
+[build.environment]
+NETLIFY_USE_YARN = "false"
+
+[[headers]]
+for = "/"
+[headers.values]
+Content-Security-Policy = "default-src 'self'; img-src 'self' https://.tiktokcdn.com https://i.ytimg.com; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'"<<<<<<< HEAD
+[build]
   publish = "."
   command = ""
   functions = "functions"
@@ -8,3 +20,26 @@
   for = "/*"
   [headers.values]
     Content-Security-Policy = "default-src 'self'; img-src 'self' https://*.tiktokcdn.com https://i.ytimg.com; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'"
+=======
+# example netlify.toml
+[build]
+  command = "./deploy_to_netlify.sh"
+  functions = "netlify/functions"
+  publish = ""
+
+  ## Uncomment to use this redirect for Single Page Applications like create-react-app.
+  ## Not needed for static site generators.
+  #[[redirects]]
+  #  from = "/*"
+  #  to = "/index.html"
+  #  status = 200
+
+  ## (optional) Settings for Netlify Dev
+  ## https://github.com/netlify/cli/blob/main/docs/netlify-dev.md#project-detection
+  #[dev]
+  #  command = "yarn start" # Command to start your dev server
+  #  port = 3000 # Port that the dev server will be listening on
+  #  publish = "dist" # Folder with the static content for _redirect file
+
+  ## more info on configuring this file: https://ntl.fyi/file-based-build-config
+>>>>>>> 4485a23a0b10a0b15f5f72800dbd8b855307b6f8

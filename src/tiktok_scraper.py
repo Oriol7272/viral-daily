@@ -1,31 +1,30 @@
-from playwright.sync_api import sync_playwright
-import time
+import requests
+from bs4 import BeautifulSoup
+import json
 
-def fetch_tiktok_trending(limit=10):
-    results = []
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        context = browser.new_context()
-        page = context.new_page()
+def scrape_tiktok_trending():
+url = "https://www.tiktok.com/trending"
+headers = {
+"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+}
+response = requests.get(url, headers=headers)
+if response.status_code != 200:
+print("Failed to fetch TikTok trending page")
+return []
 
-        page.goto("https://www.tiktok.com/trending", timeout=60000)
-        time.sleep(5)
+soup = BeautifulSoup(response.text, 'html.parser')
+videos = []
+script_tags = soup.find_all('script', id='UNIVERSAL_DATA_FOR_REHYDRATION')
+if script_tags:
+data_str = script_tags[0].string
+data = json.loads(data_str)
+trending_videos = data['DEFAULT_SCOPE']['webapp.video-detail']['itemInfo']['itemStruct']['video']
+Note: This is a placeholder; TikTok structure may vary. Adjust based on actual data.
+For real scraping, use Selenium or API if available.
 
-        links = page.query_selector_all("a[href*='video']")
-        for a in links:
-            href = a.get_attribute("href")
-            if href and href.startswith("https://www.tiktok.com/") and "/video/" in href:
-                if href not in results:
-                    results.append(href)
-            if len(results) >= limit:
-                break
+videos.append({'title': data['DEFAULT_SCOPE']['webapp.video-detail']['itemInfo']['itemStruct']['desc'], 'url': "https://www.tiktok.com/@user/video/" + trending_videos['id']})
+return videos
 
-        browser.close()
-    return results
-
-if __name__ == "__main__":
-    print("🎵 Buscando vídeos virales en TikTok...")
-    videos = fetch_tiktok_trending()
-    for i, url in enumerate(videos, 1):
-        print(f"{i}. {url}")
-
+if name == "main":
+videos = scrape_tiktok_trending()
+print(videos)
