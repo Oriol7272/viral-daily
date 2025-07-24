@@ -83,6 +83,12 @@ async function fetchTikTokVideos() {
     }
 }
 
+// Función para suscribirse
+function subscribe() {
+    alert('Redirecting to subscription page...');
+    window.location.href = 'https://buy.stripe.com/your-checkout-link'; // Replace with your Stripe link
+}
+
 // Función para filtrar videos
 function setupFilters() {
     const filterButtons = document.querySelectorAll('.platform-filter');
@@ -104,6 +110,10 @@ function setupFilters() {
 // Función para buscar videos
 function setupSearch() {
     const searchInput = document.getElementById('search-input');
+    if (!searchInput) {
+        console.error('search-input element not found');
+        return;
+    }
     const videos = document.querySelectorAll('.video-card');
 
     searchInput.addEventListener('input', () => {
@@ -115,6 +125,14 @@ function setupSearch() {
     });
 }
 
+// Inicializar suscripción
+function initSubscription() {
+    const subscribeButton = document.querySelector('.subscription-button');
+    if (subscribeButton) {
+        subscribeButton.addEventListener('click', subscribe);
+    }
+}
+
 // Función para inicializar la app
 async function init() {
     const youtubeCount = await fetchYouTubeVideos();
@@ -122,6 +140,7 @@ async function init() {
     updateChart(youtubeCount, tiktokCount);
     setupFilters();
     setupSearch();
+    initSubscription();
 }
 
 // Iniciar la app

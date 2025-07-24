@@ -39,7 +39,12 @@
     <div class="container my-5 hero-section text-center">
         <h1>Welcome to Viral Daily</h1>
         <p class="lead">Discover the most viral videos from YouTube, TikTok, Instagram, and X.</p>
-        <button class="btn btn-primary" onclick="subscribe()">Subscribe for Premium (Ad-Free)</button>
+        <button class="btn btn-primary subscription-button">Subscribe for Premium (Ad-Free)</button>
+    </div>
+
+    <!-- Search Input -->
+    <div class="container text-center">
+        <input type="text" id="search-input" class="form-control" placeholder="Buscar videos..." style="max-width: 300px; margin: 10px auto;">
     </div>
 
     <!-- Ad Container -->
@@ -97,17 +102,6 @@
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card video-card">
-                    <img src="https://via.placeholder.com/250" class="card-img-top" alt="Instagram Viral">
-                    <div class="card-body">
-                        <h5 class="card-title">remedyblog Post</h5>
-                        <p class="card-text">Say what? What is this trend? #news #viral #explorepage #trending #reels</p>
-                        <a href="https://www.instagram.com/reel/DMfLxa_soQk/" class="btn btn-primary">View Post</a>
-                        <p class="affiliate-link"><a href="https://amzn.to/your-affiliate-link?tag=your-id">Buy related product on Amazon</a></p>
-                    </div>
-                </div>
-            </div>
         </div>
     </section>
 
@@ -141,19 +135,6 @@
     </section>
 
     <!-- PWA Service Worker -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/serviceworker.js');
-            });
-        }
-
-        function subscribe() {
-            alert('Redirecting to subscription page...');
-            window.location.href = 'https://buy.stripe.com/your-checkout-link';
-        }
-    </script>
-
     <script src="/script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
