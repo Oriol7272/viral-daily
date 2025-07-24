@@ -2,7 +2,7 @@ import json
 import os
 
 def generate_html(yt_videos, ig_videos, tk_videos):
-    # Ignoramos ig_videos (Instagram no se usa)
+    # Ignoramos ig_videos (Instagram no se usa dinámicamente aún)
     html = """
 <!DOCTYPE html>
 <html lang="es">
@@ -10,126 +10,41 @@ def generate_html(yt_videos, ig_videos, tk_videos):
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Viral Daily</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Google AdSense Auto Ads Code - Replace with your client ID -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-your-adsense-id" crossorigin="anonymous"></script>
+    <link rel="manifest" href="/manifest.json">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f4f4f4;
-        }
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-        .platform {
-            margin: 20px 0;
-        }
-        .platform h2 {
-            color: #333;
-            border-bottom: 2px solid #333;
-            padding-bottom: 5px;
-        }
-        .video-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-        }
-        .video {
-            background: white;
-            border-radius: 8px;
-            padding: 10px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-            text-align: center;
-        }
-        .video img {
-            max-width: 100%;
-            border-radius: 5px;
-        }
-        .video a {
-            text-decoration: none;
-            color: #0066cc;
-            font-weight: bold;
-            display: block;
-            margin: 10px 0;
-        }
-        .video a:hover {
-            color: #003366;
-        }
-        .affiliate-link {
-            font-size: 0.8em;
-            color: #888;
-            margin-top: 5px;
-        }
-        .subscription-button {
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            padding: 15px 32px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-        }
-        .filter {
-            text-align: center;
-            margin: 20px 0;
-        }
-        .filter button {
-            padding: 10px 20px;
-            margin: 0 5px;
-            border: none;
-            border-radius: 5px;
-            background-color: #0066cc;
-            color: white;
-            cursor: pointer;
-        }
-        .filter button:hover {
-            background-color: #003366;
-        }
-        .filter button.active {
-            background-color: #003366;
-        }
-        #video-chart {
-            max-width: 600px;
-            margin: 20px auto;
-        }
-        .search {
-            text-align: center;
-            margin: 10px 0;
-        }
-        .search input {
-            padding: 10px;
-            width: 300px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-        }
-        .ad-container {
-            text-align: center;
-            margin: 20px 0;
-        }
+        .video-card { margin-bottom: 20px; }
+        .hero-section { background: linear-gradient(135deg, #0066cc, #69C9D0); color: white; padding: 50px 0; }
     </style>
 </head>
 <body>
-    <h1>Viral Daily</h1>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Viral Daily</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link active" href="#">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#youtube">YouTube</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#tiktok">TikTok</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#instagram">Instagram</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#x">X</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
 
-    <div class="subscription-button" onclick="subscribe()">Subscribe for Premium (Ad-Free)</div>
-
-    <div class="search">
-        <input type="text" id="search-input" placeholder="Buscar videos...">
+    <div class="container my-5 hero-section text-center">
+        <h1>Welcome to Viral Daily</h1>
+        <p class="lead">Discover the most viral videos from YouTube, TikTok, Instagram, and X.</p>
+        <button class="btn btn-primary" onclick="subscribe()">Subscribe for Premium (Ad-Free)</button>
     </div>
 
-    <div class="filter">
-        <button class="platform-filter active" data-platform="all">Todos</button>
-        <button class="platform-filter" data-platform="youtube">YouTube</button>
-        <button class="platform-filter" data-platform="tiktok">TikTok</button>
-    </div>
-
-    <div class="ad-container">
+    <div class="container text-center">
         <ins class="adsbygoogle"
              style="display:block"
              data-ad-client="ca-pub-your-adsense-id"
@@ -141,23 +56,91 @@ def generate_html(yt_videos, ig_videos, tk_videos):
         </script>
     </div>
 
-    <canvas id="video-chart"></canvas>
+    <div class="container">
+        <canvas id="video-chart"></canvas>
+    </div>
 
-    <section class="platform" id="youtube">
+    <section class="container my-5" id="youtube">
         <h2>🎥 YouTube</h2>
-        <div class="video-grid" id="youtube-videos">
-            {}
+        <div class="row" id="youtube-videos">{}</div>
+    </section>
+
+    <section class="container my-5" id="tiktok">
+        <h2>🎵 TikTok</h2>
+        <div class="row" id="tiktok-videos">{}</div>
+    </section>
+
+    <section class="container my-5" id="instagram">
+        <h2>📸 Instagram</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card video-card">
+                    <img src="https://via.placeholder.com/250" class="card-img-top" alt="Instagram Viral">
+                    <div class="card-body">
+                        <h5 class="card-title">Viral on Instagram: 25 Hacks</h5>
+                        <p class="card-text">If you want to see the 25 hacks used by top creators, comment HACKS.</p>
+                        <a href="https://www.instagram.com/p/DMfRv6QI5rS/" class="btn btn-primary">View Post</a>
+                        <p class="affiliate-link"><a href="https://amzn.to/your-affiliate-link?tag=your-id">Buy related product on Amazon</a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card video-card">
+                    <img src="https://via.placeholder.com/250" class="card-img-top" alt="Instagram Viral">
+                    <div class="card-body">
+                        <h5 class="card-title">HUGE Instagram Update for July 2025</h5>
+                        <p class="card-text">TikTok video about the huge Instagram update.</p>
+                        <a href="https://www.tiktok.com/@sociallyspeakingmedia/video/7529878930489134358" class="btn btn-primary">View Post</a>
+                        <p class="affiliate-link"><a href="https://amzn.to/your-affiliate-link?tag=your-id">Buy related product on Amazon</a></p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
-    <section class="platform" id="tiktok">
-        <h2>🎵 TikTok</h2>
-        <div class="video-grid" id="tiktok-videos">
-            {}
+    <section class="container my-5" id="x">
+        <h2>🐦 X</h2>
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card video-card">
+                    <img src="https://via.placeholder.com/250" class="card-img-top" alt="X Viral">
+                    <div class="card-body">
+                        <h5 class="card-title">OnlyFans model Woesenpai viral drama</h5>
+                        <p class="card-text">OnlyFans model Woesenpai is going viral after her ex-boyfriend released videos accusing her of being abusive.</p>
+                        <a href="https://x.com/FearedBuck/status/1948367738851762404" class="btn btn-primary">View Post</a>
+                        <p class="affiliate-link"><a href="https://amzn.to/your-affiliate-link?tag=your-id">Buy related product on Amazon</a></p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card video-card">
+                    <img src="https://via.placeholder.com/250" class="card-img-top" alt="X Viral">
+                    <div class="card-body">
+                        <h5 class="card-title">Funny video Mauro Icardi</h5>
+                        <p class="card-text">Omg funny video Mauro Icardi on Twitter and Reddit famosos natasha.</p>
+                        <a href="https://x.com/Takafumi1107/status/1948418505092558849" class="btn btn-primary">View Post</a>
+                        <p class="affiliate-link"><a href="https://amzn.to/your-affiliate-link?tag=your-id">Buy related product on Amazon</a></p>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/serviceworker.js');
+            });
+        }
+
+        function subscribe() {
+            alert('Redirecting to subscription page...');
+            window.location.href = 'https://buy.stripe.com/your-checkout-link';
+        }
+    </script>
 
     <script src="/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>
 """
@@ -170,17 +153,27 @@ def generate_html(yt_videos, ig_videos, tk_videos):
 
     # Generar HTML para videos
     yt_html = "".join(f"""
-        <div class="video" data-platform="youtube">
-            <a href="{v}">{v}</a>
-            <img src="https://via.placeholder.com/120" alt="Thumbnail">
-            <p class="affiliate-link"><a href="https://amzn.to/your-affiliate-link?tag=your-id">Buy related product on Amazon</a></p>
+        <div class="col-md-4">
+            <div class="card video-card">
+                <img src="https://via.placeholder.com/250" class="card-img-top" alt="Thumbnail">
+                <div class="card-body">
+                    <h5 class="card-title">{v}</h5>
+                    <a href="{v}" class="btn btn-primary">View Video</a>
+                    <p class="affiliate-link"><a href="https://amzn.to/your-affiliate-link?tag=your-id">Buy related product on Amazon</a></p>
+                </div>
+            </div>
         </div>
     """ for v in yt_videos)
     tk_html = "".join(f"""
-        <div class="video" data-platform="tiktok">
-            <a href="{v['url']}">{v['title']}</a>
-            <img src="{v['thumb']}" alt="Thumbnail">
-            <p class="affiliate-link"><a href="https://amzn.to/your-affiliate-link?tag=your-id">Buy related product on Amazon</a></p>
+        <div class="col-md-4">
+            <div class="card video-card">
+                <img src="{v['thumb']}" class="card-img-top" alt="Thumbnail">
+                <div class="card-body">
+                    <h5 class="card-title">{v['title']}</h5>
+                    <a href="{v['url']}" class="btn btn-primary">View Video</a>
+                    <p class="affiliate-link"><a href="https://amzn.to/your-affiliate-link?tag=your-id">Buy related product on Amazon</a></p>
+                </div>
+            </div>
         </div>
     """ for v in tk_videos)
 

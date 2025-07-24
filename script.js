@@ -40,16 +40,21 @@ async function fetchYouTubeVideos() {
         const data = await response.json();
         const videoGrid = document.getElementById('youtube-videos');
         videoGrid.innerHTML = data.map(item => `
-            <div class="video" data-platform="youtube">
-                <a href="${item.url}">${item.title}</a>
-                <img src="${item.thumb}" alt="Thumbnail">
-                <p class="affiliate-link"><a href="https://amzn.to/your-affiliate-link?tag=your-id">Buy related product on Amazon</a></p>
+            <div class="col-md-4">
+                <div class="card video-card">
+                    <img src="${item.thumb}" class="card-img-top" alt="Thumbnail">
+                    <div class="card-body">
+                        <h5 class="card-title">${item.title}</h5>
+                        <a href="${item.url}" class="btn btn-primary">View Video</a>
+                        <p class="affiliate-link"><a href="https://amzn.to/your-affiliate-link?tag=your-id">Buy related product on Amazon</a></p>
+                    </div>
+                </div>
             </div>
         `).join('');
         return data.length;
     } catch (error) {
         console.error('Error fetching YouTube videos:', error);
-        return 10; // Fallback a videos estáticos
+        return 10;
     }
 }
 
@@ -60,29 +65,28 @@ async function fetchTikTokVideos() {
         const data = await response.json();
         const videoGrid = document.getElementById('tiktok-videos');
         videoGrid.innerHTML = data.map(video => `
-            <div class="video" data-platform="tiktok">
-                <a href="${video.url}">${video.title}</a>
-                <img src="${video.thumb}" alt="Thumbnail">
-                <p class="affiliate-link"><a href="https://amzn.to/your-affiliate-link?tag=your-id">Buy related product on Amazon</a></p>
+            <div class="col-md-4">
+                <div class="card video-card">
+                    <img src="${video.thumb}" class="card-img-top" alt="Thumbnail">
+                    <div class="card-body">
+                        <h5 class="card-title">${video.title}</h5>
+                        <a href="${video.url}" class="btn btn-primary">View Video</a>
+                        <p class="affiliate-link"><a href="https://amzn.to/your-affiliate-link?tag=your-id">Buy related product on Amazon</a></p>
+                    </div>
+                </div>
             </div>
         `).join('');
         return data.length;
     } catch (error) {
         console.error('Error fetching TikTok videos from JSON:', error);
-        return 10; // Fallback a videos estáticos
+        return 10;
     }
-}
-
-// Función para suscribirse (placeholder para Stripe)
-function subscribe() {
-    alert('Redirecting to subscription page...');
-    window.location.href = 'https://buy.stripe.com/your-checkout-link'; // Replace with your Stripe link
 }
 
 // Función para filtrar videos
 function setupFilters() {
     const filterButtons = document.querySelectorAll('.platform-filter');
-    const videos = document.querySelectorAll('.video');
+    const videos = document.querySelectorAll('.video-card');
 
     filterButtons.forEach(button => {
         button.addEventListener('click', () => {
@@ -91,7 +95,7 @@ function setupFilters() {
 
             const platform = button.getAttribute('data-platform');
             videos.forEach(video => {
-                video.style.display = platform === 'all' || video.getAttribute('data-platform') === platform ? 'block' : 'none';
+                video.style.display = platform === 'all' || video.closest('section').id === platform ? 'block' : 'none';
             });
         });
     });
@@ -100,12 +104,12 @@ function setupFilters() {
 // Función para buscar videos
 function setupSearch() {
     const searchInput = document.getElementById('search-input');
-    const videos = document.querySelectorAll('.video');
+    const videos = document.querySelectorAll('.video-card');
 
     searchInput.addEventListener('input', () => {
         const query = searchInput.value.toLowerCase();
         videos.forEach(video => {
-            const title = video.querySelector('a').textContent.toLowerCase();
+            const title = video.querySelector('.card-title').textContent.toLowerCase();
             video.style.display = title.includes(query) ? 'block' : 'none';
         });
     });

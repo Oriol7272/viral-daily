@@ -3,7 +3,7 @@ const urlsToCache = [
   '/',
   '/index.html',
   '/script.js',
-  '/style.css'  // If you have one
+  '/public/videos.json'
 ];
 
 self.addEventListener('install', event => {
