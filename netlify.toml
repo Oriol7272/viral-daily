@@ -1,0 +1,10 @@
+[build]
+  publish = "."
+  command = ""
+  functions = "functions"
+[build.environment]
+  NETLIFY_USE_YARN = "false"
+[[headers]]
+  for = "/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; img-src 'self' https://*.tiktokcdn.com https://i.ytimg.com; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'"

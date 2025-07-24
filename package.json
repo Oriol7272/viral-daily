@@ -1,0 +1,7 @@
+{
+  "name": "viral-daily",
+  "version": "1.0.0",
+  "dependencies": {
+    "netlify-cli": "^17.10.1"
+  }
+}

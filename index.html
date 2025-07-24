@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Viral Daily</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .platform {
+            margin: 20px 0;
+        }
+        .platform h2 {
+            color: #333;
+            border-bottom: 2px solid #333;
+            padding-bottom: 5px;
+        }
+        .video-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .video {
+            background: white;
+            border-radius: 8px;
+            padding: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .video img {
+            max-width: 100%;
+            border-radius: 5px;
+        }
+        .video a {
+            text-decoration: none;
+            color: #0066cc;
+            font-weight: bold;
+            display: block;
+            margin: 10px 0;
+        }
+        .video a:hover {
+            color: #003366;
+        }
+        .filter {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .filter button {
+            padding: 10px 20px;
+            margin: 0 5px;
+            border: none;
+            border-radius: 5px;
+            background-color: #0066cc;
+            color: white;
+            cursor: pointer;
+        }
+        .filter button:hover {
+            background-color: #003366;
+        }
+        .filter button.active {
+            background-color: #003366;
+        }
+        #video-chart {
+            max-width: 600px;
+            margin: 20px auto;
+        }
+        .search {
+            text-align: center;
+            margin: 10px 0;
+        }
+        .search input {
+            padding: 10px;
+            width: 300px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+    </style>
+</head>
+<body>
+    <h1>Viral Daily</h1>
+
+    <div class="search">
+        <input type="text" id="search-input" placeholder="Buscar videos...">
+    </div>
+
+    <div class="filter">
+        <button class="platform-filter active" data-platform="all">Todos</button>
+        <button class="platform-filter" data-platform="youtube">YouTube</button>
+        <button class="platform-filter" data-platform="tiktok">TikTok</button>
+    </div>
+
+    <canvas id="video-chart"></canvas>
+
+    <section class="platform" id="youtube">
+        <h2>🎥 YouTube</h2>
+        <div class="video-grid" id="youtube-videos">
+            <div class="video" data-platform="youtube">
+                <a href="https://www.youtube.com/watch?v=BzshmDQHEm4">W Sound 06 "UNDERCROMO" - Dei V, Westcol, Ovy On The Drums</a>
+                <img src="https://via.placeholder.com/120" alt="Thumbnail">
+            </div>
+            <div class="video" data-platform="youtube">
+                <a href="https://www.youtube.com/watch?v=43R9l7EkJwE">Predator: Badlands | Official Trailer</a>
+                <img src="https://via.placeholder.com/120" alt="Thumbnail">
+            </div>
+            <div class="video" data-platform="youtube">
+                <a href="https://www.youtube.com/watch?v=EOjAPm6yI9Q">LA ETAPA DE LA INTELIGENCIA 🧠 - SPORE #2</a>
+                <img src="https://via.placeholder.com/120" alt="Thumbnail">
+            </div>
+            <div class="video" data-platform="youtube">
+                <a href="https://www.youtube.com/watch?v=V5TDD3xIWRc">Beéle - top diesel (A Cappella - Letras/Lyrics)</a>
+                <img src="https://via.placeholder.com/120" alt="Thumbnail">
+            </div>
+            <div class="video" data-platform="youtube">
+                <a href="https://www.youtube.com/watch?v=LJTIUly8FaQ">Leyendas Pokémon: Z-A – Tráiler de la historia</a>
+                <img src="https://via.placeholder.com/120" alt="Thumbnail">
+            </div>
+            <div class="video" data-platform="youtube">
+                <a href="https://www.youtube.com/watch?v=r-5dXAJwAiU">Pokémon Super Z Ep.17 - PUES SE ACABÓ.</a>
+                <img src="https://via.placeholder.com/120" alt="Thumbnail">
+            </div>
+            <div class="video" data-platform="youtube">
+                <a href="https://www.youtube.com/watch?v=j8ySGA4ILQY">Jose De Las Heras X Nickzzy - JETSKI (Video Oficial)</a>
+                <img src="https://via.placeholder.com/120" alt="Thumbnail">
+            </div>
+            <div class="video" data-platform="youtube">
+                <a href="https://www.youtube.com/watch?v=u7CwQGr-jOk">Teaser Trailer Battlefield 6: Una Coalición Armada ataca a la OTAN en Gibraltar, Precio 80€</a>
+                <img src="https://via.placeholder.com/120" alt="Thumbnail">
+            </div>
+            <div class="video" data-platform="youtube">
+                <a href="https://www.youtube.com/watch?v=GNUbgSkVTec">JUEGO A LOS JUEGOS DEL CALAMAR 3</a>
+                <img src="https://via.placeholder.com/120" alt="Thumbnail">
+            </div>
+            <div class="video" data-platform="youtube">
+                <a href="https://www.youtube.com/watch?v=oIYH8EpS2Ck">BNET vs DANI VK - Final | Red Bull España 2025</a>
+                <img src="https://via.placeholder.com/120" alt="Thumbnail">
+            </div>
+        </div>
+    </section>
+
+    <section class="platform" id="tiktok">
+        <h2>🎵 TikTok</h2>
+        <div class="video-grid" id="tiktok-videos">
+            <div class="video" data-platform="tiktok">
+                <a href="https://www.tiktok.com/@kikelait/video/7504043892203867400">TikTok video</a>
+                <img src="https://via.placeholder.com/120" alt="Thumbnail">
+            </div>
+            <div class="video" data-platform="tiktok">
+                <a href="https://www.tiktok.com/@love_animation2/video/7520765401307843896">TikTok video</a>
+                <img src="https://via.placeholder.com/120" alt="Thumbnail">
+            </div>
+            <div class="video" data-platform="tiktok">
+                <a href="https://www.tiktok.com/@iam___julii/video/7515963329735691526">TikTok video</a>
+                <img src="https://via.placeholder.com/120" alt="Thumbnail">
+            </div>
+            <div class="video" data-platform="tiktok">
+                <a href="https://www.tiktok.com/@cutgirl0225/video/7530131069702622482">TikTok video</a>
+                <img src="https://via.placeholder.com/120" alt="Thumbnail">
+            </div>
+            <div class="video" data-platform="tiktok">
+                <a href="https://www.tiktok.com/@hearts2miraaa/video/7505092264163642666">TikTok video</a>
+                <img src="https://via.placeholder.com/120" alt="Thumbnail">
+            </div>
+            <div class="video" data-platform="tiktok">
+                <a href="https://www.tiktok.com/@natizuletaa/video/7316962684870626565">TikTok video</a>
+                <img src="https://via.placeholder.com/120" alt="Thumbnail">
+            </div>
+            <div class="video" data-platform="tiktok">
+                <a href="https://www.tiktok.com/@cheocrew/video/7527359928609049870">TikTok video</a>
+                <img src="https://via.placeholder.com/120" alt="Thumbnail">
+            </div>
+            <div class="video" data-platform="tiktok">
+                <a href="https://www.tiktok.com/@brennanbaby/video/7479487399085542711">TikTok video</a>
+                <img src="https://via.placeholder.com/120" alt="Thumbnail">
+            </div>
+            <div class="video" data-platform="tiktok">
+                <a href="https://www.tiktok.com/@andysita2.0/video/7526024699889945862">TikTok video</a>
+                <img src="https://via.placeholder.com/120" alt="Thumbnail">
+            </div>
+            <div class="video" data-platform="tiktok">
+                <a href="https://www.tiktok.com/@anailma.silva2/video/7506702425705762104">TikTok video</a>
+                <img src="https://via.placeholder.com/120" alt="Thumbnail">
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Configuración del gráfico de barras
+        const ctx = document.getElementById('video-chart').getContext('2d');
+        let videoChart;
+        function updateChart(youtubeCount, tiktokCount) {
+            if (videoChart) videoChart.destroy();
+            videoChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['YouTube', 'TikTok'],
+                    datasets: [{
+                        label: 'Número de videos',
+                        data: [youtubeCount, tiktokCount],
+                        backgroundColor: ['#FF0000', '#69C9D0'],
+                        borderColor: ['#CC0000', '#55A8B0'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: { display: true, text: 'Cantidad de videos' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Plataforma' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false },
+                        title: { display: true, text: 'Videos por plataforma en Viral Daily' }
+                    }
+                }
+            });
+        }
+
+        // Función para cargar videos de YouTube
+        async function fetchYouTubeVideos() {
+            try {
+                const response = await fetch('/.netlify/functions/fetch-videos?platform=youtube');
+                const data = await response.json();
+                const videoGrid = document.getElementById('youtube-videos');
+                videoGrid.innerHTML = data.map(item => `
+                    <div class="video" data-platform="youtube">
+                        <a href="https://www.youtube.com/watch?v=${item.id}">${item.title}</a>
+                        <img src="${item.thumbnail}" alt="Thumbnail">
+                    </div>
+                `).join('');
+                return data.length;
+            } catch (error) {
+                console.error('Error fetching YouTube videos:', error);
+                return 10; // Fallback a videos estáticos
+            }
+        }
+
+        // Función para cargar videos de TikTok
+        async function fetchTikTokVideos() {
+            try {
+                const response = await fetch('/.netlify/functions/fetch-videos?platform=tiktok');
+                const data = await response.json();
+                const videoGrid = document.getElementById('tiktok-videos');
+                videoGrid.innerHTML = data.map(video => `
+                    <div class="video" data-platform="tiktok">
+                        <a href="https://www.tiktok.com/@user/video/${video.id}">${video.title}</a>
+                        <img src="${video.thumbnail}" alt="Thumbnail">
+                    </div>
+                `).join('');
+                return data.length;
+            } catch (error) {
+                console.error('Error fetching TikTok videos:', error);
+                return 10; // Fallback a videos estáticos
+            }
+        }
+
+        // Función para filtrar videos
+        function setupFilters() {
+            const filterButtons = document.querySelectorAll('.platform-filter');
+            const videos = document.querySelectorAll('.video');
+
+            filterButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    filterButtons.forEach(btn => btn.classList.remove('active'));
+                    button.classList.add('active');
+
+                    const platform = button.getAttribute('data-platform');
+                    videos.forEach(video => {
+                        video.style.display = platform === 'all' || video.getAttribute('data-platform') === platform ? 'block' : 'none';
+                    });
+                });
+            });
+        }
+
+        // Función para buscar videos
+        function setupSearch() {
+            const searchInput = document.getElementById('search-input');
+            const videos = document.querySelectorAll('.video');
+
+            searchInput.addEventListener('input', () => {
+                const query = searchInput.value.toLowerCase();
+                videos.forEach(video => {
+                    const title = video.querySelector('a').textContent.toLowerCase();
+                    video.style.display = title.includes(query) ? 'block' : 'none';
+                });
+            });
+        }
+
+        // Función para inicializar la app
+        async function init() {
+            const youtubeCount = await fetchYouTubeVideos();
+            const tiktokCount = await fetchTikTokVideos();
+            updateChart(youtubeCount, tiktokCount);
+            setupFilters();
+            setupSearch();
+        }
+
+        // Iniciar la app
+        init();
+    </script>
+</body>
+</html>
