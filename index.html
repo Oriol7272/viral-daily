@@ -145,51 +145,12 @@
             </div>
         </div>
     </section>
-
-    <section class="platform" id="tiktok">
-        <h2>🎵 TikTok</h2>
-        <div class="video-grid" id="tiktok-videos">
-            <div class="video" data-platform="tiktok">
-                <a href="https://www.tiktok.com/@kikelait/video/7504043892203867400">TikTok video</a>
-                <img src="https://via.placeholder.com/120" alt="Thumbnail">
-            </div>
-            <div class="video" data-platform="tiktok">
-                <a href="https://www.tiktok.com/@love_animation2/video/7520765401307843896">TikTok video</a>
-                <img src="https://via.placeholder.com/120" alt="Thumbnail">
-            </div>
-            <div class="video" data-platform="tiktok">
-                <a href="https://www.tiktok.com/@iam___julii/video/7515963329735691526">TikTok video</a>
-                <img src="https://via.placeholder.com/120" alt="Thumbnail">
-            </div>
-            <div class="video" data-platform="tiktok">
-                <a href="https://www.tiktok.com/@cutgirl0225/video/7530131069702622482">TikTok video</a>
-                <img src="https://via.placeholder.com/120" alt="Thumbnail">
-            </div>
-            <div class="video" data-platform="tiktok">
-                <a href="https://www.tiktok.com/@hearts2miraaa/video/7505092264163642666">TikTok video</a>
-                <img src="https://via.placeholder.com/120" alt="Thumbnail">
-            </div>
-            <div class="video" data-platform="tiktok">
-                <a href="https://www.tiktok.com/@natizuletaa/video/7316962684870626565">TikTok video</a>
-                <img src="https://via.placeholder.com/120" alt="Thumbnail">
-            </div>
-            <div class="video" data-platform="tiktok">
-                <a href="https://www.tiktok.com/@cheocrew/video/7527359928609049870">TikTok video</a>
-                <img src="https://via.placeholder.com/120" alt="Thumbnail">
-            </div>
-            <div class="video" data-platform="tiktok">
-                <a href="https://www.tiktok.com/@brennanbaby/video/7479487399085542711">TikTok video</a>
-                <img src="https://via.placeholder.com/120" alt="Thumbnail">
-            </div>
-            <div class="video" data-platform="tiktok">
-                <a href="https://www.tiktok.com/@andysita2.0/video/7526024699889945862">TikTok video</a>
-                <img src="https://via.placeholder.com/120" alt="Thumbnail">
-            </div>
-            <div class="video" data-platform="tiktok">
-                <a href="https://www.tiktok.com/@anailma.silva2/video/7506702425705762104">TikTok video</a>
-                <img src="https://via.placeholder.com/120" alt="Thumbnail">
-            </div>
-        </div>
+<section class="platform" id="tiktok">
+    <h2>🎵 TikTok</h2>
+    <div class="video-grid" id="tiktok-videos">
+        <!-- Videos cargados dinámicamente desde videos.json -->
+    </div>
+</section>
     </section>
 
     <script>
@@ -310,5 +271,38 @@
         // Iniciar la app
         init();
     </script>
+<script>
+    // ... Código existente de index.html (mantén el código de YouTube, filtros, búsqueda, gráfico)...
+
+    // Función para cargar videos de TikTok desde videos.json
+    async function fetchTikTokFromJson() {
+        try {
+            const response = await fetch('/videos.json');
+            const data = await response.json();
+            const videoGrid = document.getElementById('tiktok-videos');
+            videoGrid.innerHTML = data.map(video => `
+                <div class="video" data-platform="tiktok">
+                    <a href="${video.url}">${video.title}</a>
+                    <img src="${video.thumb}" alt="Thumbnail">
+                </div>
+            `).join('');
+            return data.length;
+        } catch (error) {
+            console.error('Error fetching TikTok JSON:', error);
+            return 10; // Fallback a videos estáticos
+        }
+    }
+
+    // Actualiza la función init para incluir TikTok JSON
+    async function init() {
+        const youtubeCount = await fetchYouTubeVideos();
+        const tiktokCount = await fetchTikTokFromJson();
+        updateChart(youtubeCount, tiktokCount);
+        setupFilters();
+        setupSearch();
+    }
+
+    init();
+</script>
 </body>
 </html>
