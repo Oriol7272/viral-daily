@@ -1,34 +1,34 @@
-mport requests
-from bs4 import BeautifulSoup
-import json
+# src/youtube_popular.py
+import requests
+import os
 
-def scrape_youtube_popular():
-url = "https://www.youtube.com/feed/trending"
-headers = {
-"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
-}
-response = requests.get(url, headers=headers)
-if response.status_code != 200:
-print("Failed to fetch YouTube trending page")
-return []
+def fetch_youtube_popular():
+    try:
+        response = requests.get(
+            'https://www.googleapis.com/youtube/v3/videos',
+            params={
+                'part': 'snippet',
+                'chart': 'mostPopular',
+                'maxResults': 10,
+                'key': os.getenv('YOUTUBE_API_KEY')
+            }
+        )
+        if response.status_code == 200:
+            data = response.json()
+            return [
+                {
+                    'url': f"https://www.youtube.com/watch?v={item['id']}",
+                    'title': item['snippet']['title'],
+                    'thumb': item['snippet']['thumbnails']['medium']['url']
+                } for item in data.get('items', [])
+            ]
+        else:
+            print(f"Failed to fetch YouTube videos: {response.status_code}")
+            return []
+    except Exception as e:
+        print(f"Error fetching YouTube videos: {e}")
+        return []
 
-soup = BeautifulSoup(response.text, 'html.parser')
-videos = []
-script_tags = soup.find_all('script')
-for script in script_tags:
-if 'var ytInitialData = ' in script.string:
-data_str = script.string.split('var ytInitialData = ')[1].rstrip(';')
-data = json.loads(data_str)
-contents = data['contents']['twoColumnBrowseResultsRenderer']['tabs'][0]['tabRenderer']['content']['sectionListRenderer']['contents'][0]['itemSectionRenderer']['contents']
-for content in contents:
-if 'videoRenderer' in content:
-video = content['videoRenderer']
-title = video['title']['runs'][0]['text']
-url = "https://www.youtube.com/watch?v=" + video['videoId']
-videos.append({'title': title, 'url': url})
-break
-return videos
-
-if name == "main":
-videos = scrape_youtube_popular()
-print(videos)
+if __name__ == "__main__":
+    videos = fetch_youtube_popular()
+    print(videos)

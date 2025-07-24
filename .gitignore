@@ -1,7 +1,4 @@
 node_modules/
 .netlify/
 .env
-viral-env/node_modules/
-.netlify/
-.env
 viral-env/
