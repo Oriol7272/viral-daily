@@ -10,7 +10,7 @@ def generate_html(yt_videos, ig_videos, tk_videos):
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Viral Daily</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-your-adsense-id" crossorigin="anonymous"></script>
     <link rel="manifest" href="/manifest.json">
     <style>
@@ -130,49 +130,3 @@ def generate_html(yt_videos, ig_videos, tk_videos):
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>
-"""
-
-    # Cargar videos de TikTok desde videos.json
-    tk_videos = []
-    if os.path.exists("videos.json"):
-        with open("videos.json", "r") as f:
-            tk_videos = json.load(f)
-
-    # Generar HTML para videos
-    yt_html = "".join(f"""
-        <div class="col-md-4">
-            <div class="card video-card">
-                <img src="https://via.placeholder.com/250" class="card-img-top" alt="Thumbnail">
-                <div class="card-body">
-                    <h5 class="card-title">{v}</h5>
-                    <a href="{v}" class="btn btn-primary">View Video</a>
-                    <p class="affiliate-link"><a href="https://amzn.to/your-affiliate-link?tag=your-id">Buy related product on Amazon</a></p>
-                </div>
-            </div>
-        </div>
-    """ for v in yt_videos)
-    tk_html = "".join(f"""
-        <div class="col-md-4">
-            <div class="card video-card">
-                <img src="{v['thumb']}" class="card-img-top" alt="Thumbnail">
-                <div class="card-body">
-                    <h5 class="card-title">{v['title']}</h5>
-                    <a href="{v['url']}" class="btn btn-primary">View Video</a>
-                    <p class="affiliate-link"><a href="https://amzn.to/your-affiliate-link?tag=your-id">Buy related product on Amazon</a></p>
-                </div>
-            </div>
-        </div>
-    """ for v in tk_videos)
-
-    html = html.format(yt_html, tk_html)
-
-    # Guardar HTML
-    with open("viral_daily.html", "w") as f:
-        f.write(html)
-
-    # Copiar a public/index.html para Netlify
-    os.makedirs("public", exist_ok=True)
-    with open("public/index.html", "w") as f:
-        f.write(html)
-
-    print("✅ viral_daily.html generado y copiado a public/index.html")
