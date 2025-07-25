@@ -2,7 +2,6 @@ import json
 import os
 
 def generate_html(yt_videos, ig_videos, tk_videos):
-    # Ignoramos ig_videos (Instagram no se usa dinámicamente aún)
     html = """
 <!DOCTYPE html>
 <html lang="es">
@@ -11,7 +10,7 @@ def generate_html(yt_videos, ig_videos, tk_videos):
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Viral Daily</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-your-adsense-id" crossorigin="anonymous"></script>
     <link rel="manifest" href="/manifest.json">
     <style>
@@ -41,7 +40,11 @@ def generate_html(yt_videos, ig_videos, tk_videos):
     <div class="container my-5 hero-section text-center">
         <h1>Welcome to Viral Daily</h1>
         <p class="lead">Discover the most viral videos from YouTube, TikTok, Instagram, and X.</p>
-        <button class="btn btn-primary" onclick="subscribe()">Subscribe for Premium (Ad-Free)</button>
+        <button class="btn btn-primary subscription-button">Subscribe for Premium (Ad-Free)</button>
+    </div>
+
+    <div class="container text-center">
+        <input type="text" id="search-input" class="form-control" placeholder="Buscar videos..." style="max-width: 300px; margin: 10px auto;">
     </div>
 
     <div class="container text-center">
@@ -51,9 +54,6 @@ def generate_html(yt_videos, ig_videos, tk_videos):
              data-ad-slot="your-ad-unit-id"
              data-ad-format="auto"
              data-full-width-responsive="true"></ins>
-        <script>
-             (adsbygoogle = window.adsbygoogle || []).push({});
-        </script>
     </div>
 
     <div class="container">
@@ -62,12 +62,12 @@ def generate_html(yt_videos, ig_videos, tk_videos):
 
     <section class="container my-5" id="youtube">
         <h2>🎥 YouTube</h2>
-        <div class="row" id="youtube-videos">{}</div>
+        <div class="row">{}</div>
     </section>
 
     <section class="container my-5" id="tiktok">
         <h2>🎵 TikTok</h2>
-        <div class="row" id="tiktok-videos">{}</div>
+        <div class="row">{}</div>
     </section>
 
     <section class="container my-5" id="instagram">
@@ -77,9 +77,9 @@ def generate_html(yt_videos, ig_videos, tk_videos):
                 <div class="card video-card">
                     <img src="https://via.placeholder.com/250" class="card-img-top" alt="Instagram Viral">
                     <div class="card-body">
-                        <h5 class="card-title">Viral on Instagram: 25 Hacks</h5>
-                        <p class="card-text">If you want to see the 25 hacks used by top creators, comment HACKS.</p>
-                        <a href="https://www.instagram.com/p/DMfRv6QI5rS/" class="btn btn-primary">View Post</a>
+                        <h5 class="card-title">Viral Bhayani Post</h5>
+                        <p class="card-text">153 likes, 15 comments - viralbhayani on July 24, 2025.</p>
+                        <a href="https://www.instagram.com/reel/DMfiyDxTZS4/" class="btn btn-primary">View Post</a>
                         <p class="affiliate-link"><a href="https://amzn.to/your-affiliate-link?tag=your-id">Buy related product on Amazon</a></p>
                     </div>
                 </div>
@@ -88,9 +88,9 @@ def generate_html(yt_videos, ig_videos, tk_videos):
                 <div class="card video-card">
                     <img src="https://via.placeholder.com/250" class="card-img-top" alt="Instagram Viral">
                     <div class="card-body">
-                        <h5 class="card-title">HUGE Instagram Update for July 2025</h5>
-                        <p class="card-text">TikTok video about the huge Instagram update.</p>
-                        <a href="https://www.tiktok.com/@sociallyspeakingmedia/video/7529878930489134358" class="btn btn-primary">View Post</a>
+                        <h5 class="card-title">Viral Bhayani Post</h5>
+                        <p class="card-text">631 likes, 20 comments - viralbhayani on July 24, 2025.</p>
+                        <a href="https://www.instagram.com/reel/DMffAwwTGvg/" class="btn btn-primary">View Post</a>
                         <p class="affiliate-link"><a href="https://amzn.to/your-affiliate-link?tag=your-id">Buy related product on Amazon</a></p>
                     </div>
                 </div>
@@ -125,19 +125,6 @@ def generate_html(yt_videos, ig_videos, tk_videos):
             </div>
         </div>
     </section>
-
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/serviceworker.js');
-            });
-        }
-
-        function subscribe() {
-            alert('Redirecting to subscription page...');
-            window.location.href = 'https://buy.stripe.com/your-checkout-link';
-        }
-    </script>
 
     <script src="/script.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>

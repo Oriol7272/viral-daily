@@ -2,8 +2,7 @@ const CACHE_NAME = 'viral-daily-cache-v1';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/script.js',
-  '/public/videos.json'
+  '/script.js'
 ];
 
 self.addEventListener('install', event => {
@@ -19,7 +18,9 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        return response || fetch(event.request);
+        return response || fetch(event.request).catch(() => {
+          return caches.match('/index.html');
+        });
       })
   );
 });

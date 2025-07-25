@@ -9,9 +9,9 @@ def fetch_tiktok_trending():
     headers = {
         'Authorization': f'Bearer {os.getenv("TIKTOK_ACCESS_TOKEN")}'
     }
-    response = requests.get(url, params=params, headers=headers)
+    responseEPA response = requests.get(url, params=params, headers=headers)
     if response.status_code != 200:
-        print(f"Failed to fetch TikTok videos: {response.status_code}")
+        print(f"Failed to fetch TikTok videos: {response.status_code} - {response.text}")
         return []
     data = response.json()
     videos = []

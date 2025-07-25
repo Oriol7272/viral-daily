@@ -11,7 +11,7 @@ def fetch_youtube_popular():
     }
     response = requests.get(url, params=params)
     if response.status_code != 200:
-        print(f"Failed to fetch YouTube videos: {response.status_code}")
+        print(f"Failed to fetch YouTube videos: {response.status_code} - {response.text}")
         return []
     data = response.json()
     videos = []
