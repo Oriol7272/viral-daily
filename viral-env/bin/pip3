@@ -1,4 +1,4 @@
-#!/Users/oriolcabre/viral-daily/viral-env/bin/python3
+#!/Users/oriolcabre/Downloads/viral-daily/viral-env/bin/python3.13
 # -*- coding: utf-8 -*-
 import re
 import sys
