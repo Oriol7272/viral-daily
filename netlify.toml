@@ -1,12 +1,9 @@
 [build]
+  command = "npm install && node generate-virales.js"
   publish = "."
-  command = ""
-  functions = "functions"
-
-[build.environment]
-  NETLIFY_USE_YARN = "false"
-
-[[headers]]
-  for = "/*"
-  [headers.values]
-    Content-Security-Policy = "default-src 'self'; img-src 'self' https://*.tiktokcdn.com https://*.tiktokcdn-eu.com https://*.tiktokcdn-us.com https://p16-pu-sign-no.tiktokcdn-eu.com https://p16-sign-useast2a.tiktokcdn.com https://p77-sign-va.tiktokcdn.com https://i.ytimg.com https://via.placeholder.com https://scontent.cdninstagram.com; script-src 'self' https://cdn.jsdelivr.net https://pagead2.googlesyndication.com 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; connect-src 'self' https://pagead2.googlesyndication.com"
+  environment = { 
+    NODE_VERSION = "22",
+    YOUTUBE_API_KEY = "AIzaSyDyuMNfrJXOMk4lCwJ7GV70zEP6iwrISuY",
+    TIKTOK_MS_TOKEN = "X_LeGXnwuxU3UoagaHwJO772TN7gDLYTt_Vn5rN54jDZsC1B7Sm_6XE8r1DDQfsCCH0l94tRJ1zCp_X7navLQQLcbhGqrzHZF9Ny8nKg0itVq9wB4NR9_NZyvfQluZPShhgKMhuhRETyJj-quBSC5uVU",
+    X_BEARER_TOKEN = "AAAAAAAAAAAAAAAAAAAAAHvz3AEAAAAA0KKiiRMU8nwQ8ggjG96GDhCZ8T8%3D6BrOF6a4YszLFgLKD1sLlSuhzZdkIFemgCQxo0cTaXAXtjLHnJ"
+  }
