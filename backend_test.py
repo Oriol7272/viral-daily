@@ -548,6 +548,7 @@ class ViralDailyAPITester:
             ("PayPal Create Order (Authenticated)", self.test_paypal_create_order_authenticated),
             ("PayPal Order Status", self.test_paypal_order_status),
             ("PayPal Webhook Handler", self.test_paypal_webhook),
+            ("PayPal Error Handling", self.test_paypal_error_handling),
         ]
         
         all_tests = core_tests + monetization_tests + paypal_tests
