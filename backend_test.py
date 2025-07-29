@@ -629,7 +629,7 @@ class ViralDailyAPITester:
 
     def run_all_tests(self):
         """Run all API tests including monetization and PayPal features"""
-        print("🚀 Starting Viral Daily MONETIZED API Tests with PayPal Business Account Integration")
+        print("🚀 Starting Viral Daily MONETIZED API Tests with PayPal NEW Live Credentials Integration")
         print("=" * 70)
         
         # Test core endpoints first
