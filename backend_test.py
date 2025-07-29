@@ -306,9 +306,9 @@ class ViralDailyAPITester:
         return False
 
     def test_paypal_availability(self):
-        """Test GET /api/payments/paypal/available - PayPal availability check"""
+        """Test GET /api/payments/paypal/available - PayPal availability check with live mode"""
         success, response = self.run_test(
-            "PayPal Availability Check",
+            "PayPal Availability Check (Live Mode)",
             "GET",
             "payments/paypal/available",
             200
@@ -319,16 +319,27 @@ class ViralDailyAPITester:
             missing_fields = [field for field in required_fields if field not in response]
             
             if missing_fields:
-                print(f"   ⚠️  Missing fields: {missing_fields}")
+                print(f"   ❌ Missing fields: {missing_fields}")
                 return False
             else:
-                print(f"   ✅ PayPal Available: {response['available']}")
-                print(f"   Mode: {response['mode']}")
-                if response['available']:
-                    print("   🎉 PayPal is now available with real credentials!")
+                available = response['available']
+                mode = response['mode']
+                
+                print(f"   PayPal Available: {available}")
+                print(f"   Mode: {mode}")
+                
+                # Check for live mode specifically
+                live_mode_correct = mode == "live"
+                print(f"   ✅ Live Mode: {'✅ CORRECT' if live_mode_correct else '❌ INCORRECT (Expected: live, Got: ' + str(mode) + ')'}")
+                
+                if available and live_mode_correct:
+                    print("   🎉 PayPal is available in LIVE mode with business account!")
+                elif available:
+                    print("   ⚠️  PayPal is available but not in live mode")
                 else:
-                    print("   ⚠️  PayPal not available - credentials may be missing")
-                return True
+                    print("   ❌ PayPal not available - credentials may be missing")
+                
+                return available and live_mode_correct
         return False
 
     def test_paypal_create_order_unauthenticated(self):
