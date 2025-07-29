@@ -199,10 +199,11 @@ async def require_business_user(user: User = Depends(require_user)) -> User:
         )
     return user
 
-async def check_rate_limit(user: Optional[User], db) -> bool:
+async def check_rate_limit(user: Optional[User]) -> bool:
     """Check API rate limits"""
     if not user:
         return True  # Allow anonymous access with basic limits
     
-    auth_service = AuthService(db)
+    # Import here to avoid circular imports
+    from server import auth_service
     return await auth_service.check_api_rate_limit(user)
