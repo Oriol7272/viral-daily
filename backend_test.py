@@ -589,7 +589,7 @@ class ViralDailyAPITester:
 
     def run_all_tests(self):
         """Run all API tests including monetization and PayPal features"""
-        print("🚀 Starting Viral Daily MONETIZED API Tests with PayPal Integration")
+        print("🚀 Starting Viral Daily MONETIZED API Tests with PayPal Business Account Integration")
         print("=" * 70)
         
         # Test core endpoints first
@@ -606,6 +606,54 @@ class ViralDailyAPITester:
             ("Videos with Authentication", self.test_videos_with_auth),
             ("Subscription Info", self.test_subscription_info),
         ]
+        
+        # Test PayPal integration with business account focus
+        paypal_tests = [
+            ("PayPal Configuration (Business Account)", self.test_paypal_config),
+            ("PayPal Availability (Live Mode)", self.test_paypal_availability),
+            ("PayPal EUR Currency Validation", self.test_paypal_eur_currency_validation),
+            ("PayPal Create Order (Unauthenticated)", self.test_paypal_create_order_unauthenticated),
+            ("PayPal Create Order (Authenticated)", self.test_paypal_create_order_authenticated),
+            ("PayPal Order Status", self.test_paypal_order_status),
+            ("PayPal Webhook Handler", self.test_paypal_webhook),
+            ("PayPal Error Handling", self.test_paypal_error_handling),
+        ]
+        
+        all_tests = core_tests + monetization_tests + paypal_tests
+        
+        for test_name, test_func in all_tests:
+            print(f"\n📋 Running {test_name} Tests...")
+            try:
+                test_func()
+            except Exception as e:
+                print(f"❌ Test suite failed: {str(e)}")
+        
+        # Print final results
+        print("\n" + "=" * 70)
+        print(f"📊 Final Results: {self.tests_passed}/{self.tests_run} tests passed")
+        
+        # Detailed summary
+        success_rate = (self.tests_passed / self.tests_run) * 100 if self.tests_run > 0 else 0
+        print(f"📈 Success Rate: {success_rate:.1f}%")
+        
+        if self.tests_passed == self.tests_run:
+            print("🎉 All tests passed! MONETIZED API with PayPal Business Account is working correctly.")
+            print("💰 Monetization features: ✅ FULLY FUNCTIONAL")
+            print("💳 PayPal Business Account: ✅ PROPERLY CONFIGURED")
+            return 0
+        else:
+            failed_tests = self.tests_run - self.tests_passed
+            print(f"⚠️  {failed_tests} tests failed.")
+            if success_rate >= 80:
+                print("💰 Monetization features: ✅ MOSTLY FUNCTIONAL")
+                print("💳 PayPal Business Account: ✅ MOSTLY FUNCTIONAL")
+            elif success_rate >= 60:
+                print("💰 Monetization features: ⚠️  PARTIALLY FUNCTIONAL")
+                print("💳 PayPal Business Account: ⚠️  PARTIALLY FUNCTIONAL")
+            else:
+                print("💰 Monetization features: ❌ NEEDS ATTENTION")
+                print("💳 PayPal Business Account: ❌ NEEDS ATTENTION")
+            return 1
         
         # Test PayPal integration
         paypal_tests = [
