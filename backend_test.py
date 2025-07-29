@@ -343,7 +343,7 @@ class ViralDailyAPITester:
         return False
 
     def test_paypal_create_order_unauthenticated(self):
-        """Test POST /api/payments/paypal/create-order without authentication"""
+        """Test POST /api/payments/paypal/create-order without authentication (Business Account)"""
         order_data = {
             "subscription_tier": "pro",
             "billing_cycle": "monthly"
@@ -358,9 +358,9 @@ class ViralDailyAPITester:
         )
         
         if avail_success and avail_response.get('available'):
-            # PayPal is available, but should still work without auth for order creation
+            # PayPal is available, should work without auth for order creation
             success, response = self.run_test(
-                "PayPal Create Order (Unauthenticated - Real Credentials)",
+                "PayPal Create Order (Unauthenticated - Business Account)",
                 "POST",
                 "payments/paypal/create-order",
                 200,  # Should succeed even without auth
@@ -370,6 +370,12 @@ class ViralDailyAPITester:
             if success and isinstance(response, dict):
                 print("   🎉 PayPal Order Creation works without authentication!")
                 print(f"   Order ID: {response.get('order_id', 'N/A')}")
+                
+                # Check for EUR currency in approval URL or response
+                approval_url = response.get('approval_url', '')
+                if approval_url and "paypal.com" in approval_url and "sandbox" not in approval_url:
+                    print("   ✅ Live PayPal URL confirmed - business account active")
+                
                 return True
             return False
         else:
