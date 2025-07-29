@@ -394,7 +394,7 @@ class ViralDailyAPITester:
             return False
 
     def test_paypal_create_order_authenticated(self):
-        """Test POST /api/payments/paypal/create-order with authentication and business account (EUR currency)"""
+        """Test POST /api/payments/paypal/create-order with authentication and NEW live credentials (EUR currency)"""
         if not self.test_api_key:
             print("   ⚠️  No API key available, skipping test")
             return False
