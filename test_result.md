@@ -107,7 +107,7 @@ user_problem_statement: "Complete PayPal integration for payment processing in V
 backend:
   - task: "PayPal payment integration backend API endpoints"
     implemented: true
-    working: true
+    working: false
     file: "/app/backend/paypal_integration.py"
     stuck_count: 0
     priority: "high"
