@@ -677,22 +677,22 @@ class ViralDailyAPITester:
         print(f"📈 Success Rate: {success_rate:.1f}%")
         
         if self.tests_passed == self.tests_run:
-            print("🎉 All tests passed! MONETIZED API with PayPal Business Account is working correctly.")
+            print("🎉 All tests passed! MONETIZED API with PayPal NEW Live Credentials is working correctly.")
             print("💰 Monetization features: ✅ FULLY FUNCTIONAL")
-            print("💳 PayPal Business Account: ✅ PROPERLY CONFIGURED")
+            print("💳 PayPal NEW Live Credentials: ✅ PROPERLY CONFIGURED")
             return 0
         else:
             failed_tests = self.tests_run - self.tests_passed
             print(f"⚠️  {failed_tests} tests failed.")
             if success_rate >= 80:
                 print("💰 Monetization features: ✅ MOSTLY FUNCTIONAL")
-                print("💳 PayPal Business Account: ✅ MOSTLY FUNCTIONAL")
+                print("💳 PayPal NEW Live Credentials: ✅ MOSTLY FUNCTIONAL")
             elif success_rate >= 60:
                 print("💰 Monetization features: ⚠️  PARTIALLY FUNCTIONAL")
-                print("💳 PayPal Business Account: ⚠️  PARTIALLY FUNCTIONAL")
+                print("💳 PayPal NEW Live Credentials: ⚠️  PARTIALLY FUNCTIONAL")
             else:
                 print("💰 Monetization features: ❌ NEEDS ATTENTION")
-                print("💳 PayPal Business Account: ❌ NEEDS ATTENTION")
+                print("💳 PayPal NEW Live Credentials: ❌ NEEDS ATTENTION")
             return 1
         
         # Test PayPal integration
