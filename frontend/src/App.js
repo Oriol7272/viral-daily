@@ -34,6 +34,8 @@ const PlatformFilter = ({ selectedPlatform, onPlatformChange }) => {
 };
 
 const VideoCard = ({ video }) => {
+  const [imageError, setImageError] = useState(false);
+  
   const getPlatformIcon = (platform) => {
     const icons = {
       youtube: '📺',
@@ -46,12 +48,22 @@ const VideoCard = ({ video }) => {
 
   const getPlatformColor = (platform) => {
     const colors = {
-      youtube: 'border-red-500',
-      tiktok: 'border-black',
-      twitter: 'border-blue-500',
-      instagram: 'border-pink-500'
+      youtube: 'border-red-500 bg-red-50',
+      tiktok: 'border-black bg-gray-50',
+      twitter: 'border-blue-500 bg-blue-50',
+      instagram: 'border-pink-500 bg-pink-50'
     };
-    return colors[platform] || 'border-gray-500';
+    return colors[platform] || 'border-gray-500 bg-gray-50';
+  };
+
+  const getPlatformGradient = (platform) => {
+    const gradients = {
+      youtube: 'from-red-500 to-red-600',
+      tiktok: 'from-black to-gray-800',
+      twitter: 'from-blue-500 to-blue-600',
+      instagram: 'from-pink-500 to-purple-600'
+    };
+    return gradients[platform] || 'from-gray-500 to-gray-600';
   };
 
   const formatViews = (views) => {
@@ -61,47 +73,83 @@ const VideoCard = ({ video }) => {
     return views.toString();
   };
 
+  const getReliableThumbnail = () => {
+    if (imageError || !video.thumbnail) {
+      // Create a custom thumbnail based on platform
+      const colors = {
+        youtube: '#FF0000',
+        tiktok: '#000000',
+        twitter: '#1DA1F2',
+        instagram: '#E4405F'
+      };
+      const bgColor = colors[video.platform] || '#6B7280';
+      const icon = getPlatformIcon(video.platform);
+      
+      return `data:image/svg+xml;base64,${btoa(`
+        <svg width="400" height="225" xmlns="http://www.w3.org/2000/svg">
+          <rect width="400" height="225" fill="${bgColor}"/>
+          <text x="200" y="100" text-anchor="middle" fill="white" font-size="48">${icon}</text>
+          <text x="200" y="140" text-anchor="middle" fill="white" font-size="18" font-weight="bold">${video.platform.toUpperCase()}</text>
+          <text x="200" y="165" text-anchor="middle" fill="white" font-size="14">🔥 ${video.viral_score?.toFixed(0) || 'N/A'} Viral Score</text>
+        </svg>
+      `)}`;
+    }
+    return video.thumbnail;
+  };
+
   return (
-    <div className={`bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 hover:scale-105 border-t-4 ${getPlatformColor(video.platform)}`}>
-      <div className="relative">
+    <div className={`bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition-all duration-300 hover:scale-105 border-t-4 ${getPlatformColor(video.platform)} animate-fadeInUp`}>
+      <div className="relative group">
         <img 
-          src={video.thumbnail} 
+          src={getReliableThumbnail()}
           alt={video.title}
-          className="w-full h-48 object-cover"
-          onError={(e) => {
-            e.target.src = `https://via.placeholder.com/400x225/6B7280/FFFFFF?text=${video.platform.toUpperCase()}`;
-          }}
+          className="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-300"
+          onError={() => setImageError(true)}
         />
-        <div className="absolute top-2 right-2 bg-black bg-opacity-70 text-white px-2 py-1 rounded text-sm">
+        <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300"></div>
+        
+        {/* Platform Badge */}
+        <div className="absolute top-2 right-2 bg-black bg-opacity-80 text-white px-3 py-1 rounded-full text-sm font-medium">
           {getPlatformIcon(video.platform)} {video.platform.toUpperCase()}
         </div>
+        
+        {/* Viral Score Badge */}
         {video.viral_score && (
-          <div className="absolute top-2 left-2 bg-orange-500 text-white px-2 py-1 rounded text-sm font-bold">
+          <div className="absolute top-2 left-2 bg-gradient-to-r from-orange-500 to-red-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-lg">
             🔥 {video.viral_score.toFixed(0)}
           </div>
         )}
+
+        {/* Play Button Overlay */}
+        <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="bg-white bg-opacity-90 rounded-full p-4 shadow-lg">
+            <svg className="w-8 h-8 text-gray-800" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+            </svg>
+          </div>
+        </div>
       </div>
       
-      <div className="p-4">
-        <h3 className="font-bold text-lg mb-2 line-clamp-2 hover:text-blue-600 transition-colors">
+      <div className="p-5">
+        <h3 className="font-bold text-lg mb-3 line-clamp-2 hover:text-blue-600 transition-colors cursor-pointer">
           {video.title}
         </h3>
         
         {video.author && (
-          <p className="text-gray-600 text-sm mb-2">
-            👤 {video.author}
+          <p className="text-gray-600 text-sm mb-3 flex items-center">
+            <span className="mr-1">👤</span> {video.author}
           </p>
         )}
         
-        <div className="flex justify-between items-center text-sm text-gray-500 mb-3">
+        <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
           {video.views && (
-            <span className="flex items-center">
-              👀 {formatViews(video.views)} views
+            <span className="flex items-center bg-gray-100 px-2 py-1 rounded-full">
+              <span className="mr-1">👀</span> {formatViews(video.views)}
             </span>
           )}
           {video.likes && (
-            <span className="flex items-center">
-              ❤️ {formatViews(video.likes)}
+            <span className="flex items-center bg-red-100 px-2 py-1 rounded-full">
+              <span className="mr-1">❤️</span> {formatViews(video.likes)}
             </span>
           )}
         </div>
@@ -110,7 +158,7 @@ const VideoCard = ({ video }) => {
           href={video.url} 
           target="_blank" 
           rel="noopener noreferrer"
-          className="block w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white text-center py-2 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 font-medium"
+          className={`block w-full bg-gradient-to-r ${getPlatformGradient(video.platform)} text-white text-center py-3 rounded-lg hover:shadow-lg transition-all duration-200 font-medium`}
         >
           Watch Now 🚀
         </a>
@@ -118,6 +166,18 @@ const VideoCard = ({ video }) => {
     </div>
   );
 };
+
+const LoadingCard = () => (
+  <div className="bg-white rounded-xl shadow-lg overflow-hidden animate-pulse">
+    <div className="h-48 bg-gray-300"></div>
+    <div className="p-5">
+      <div className="h-4 bg-gray-300 rounded mb-2"></div>
+      <div className="h-4 bg-gray-300 rounded w-3/4 mb-3"></div>
+      <div className="h-3 bg-gray-300 rounded w-1/2 mb-4"></div>
+      <div className="h-10 bg-gray-300 rounded"></div>
+    </div>
+  </div>
+);
 
 const SubscriptionModal = ({ isOpen, onClose, onSubscribe }) => {
   const [email, setEmail] = useState('');
@@ -158,11 +218,11 @@ const SubscriptionModal = ({ isOpen, onClose, onSubscribe }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 modal-backdrop">
+      <div className="bg-white rounded-xl p-6 w-full max-w-md transform transition-all duration-300 scale-100">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Get Daily Viral Videos 📱</h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">
             ✕
           </button>
         </div>
@@ -172,32 +232,32 @@ const SubscriptionModal = ({ isOpen, onClose, onSubscribe }) => {
             <label className="block text-sm font-medium mb-2">Choose delivery methods:</label>
             
             <div className="space-y-2">
-              <label className="flex items-center">
+              <label className="flex items-center p-2 rounded-lg hover:bg-gray-50 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={methods.includes('email')}
                   onChange={() => handleMethodToggle('email')}
-                  className="mr-2"
+                  className="mr-3 w-4 h-4"
                 />
                 📧 Email
               </label>
               
-              <label className="flex items-center">
+              <label className="flex items-center p-2 rounded-lg hover:bg-gray-50 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={methods.includes('telegram')}
                   onChange={() => handleMethodToggle('telegram')}
-                  className="mr-2"
+                  className="mr-3 w-4 h-4"
                 />
                 📱 Telegram
               </label>
               
-              <label className="flex items-center">
+              <label className="flex items-center p-2 rounded-lg hover:bg-gray-50 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={methods.includes('whatsapp')}
                   onChange={() => handleMethodToggle('whatsapp')}
-                  className="mr-2"
+                  className="mr-3 w-4 h-4"
                 />
                 💬 WhatsApp
               </label>
@@ -211,7 +271,7 @@ const SubscriptionModal = ({ isOpen, onClose, onSubscribe }) => {
                 placeholder="Your email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 required
               />
             </div>
@@ -224,7 +284,7 @@ const SubscriptionModal = ({ isOpen, onClose, onSubscribe }) => {
                 placeholder="Your Telegram username (e.g., @username)"
                 value={telegram}
                 onChange={(e) => setTelegram(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 required
               />
             </div>
@@ -237,23 +297,23 @@ const SubscriptionModal = ({ isOpen, onClose, onSubscribe }) => {
                 placeholder="Your WhatsApp number (+1234567890)"
                 value={whatsapp}
                 onChange={(e) => setWhatsapp(e.target.value)}
-                className="w-full p-2 border border-gray-300 rounded-lg"
+                className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 required
               />
             </div>
           )}
           
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="flex-1 py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50"
+              className="flex-1 py-3 px-4 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="flex-1 py-2 px-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600"
+              className="flex-1 py-3 px-4 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
             >
               Subscribe 🔔
             </button>
@@ -277,11 +337,15 @@ function App() {
     setError(null);
     
     try {
+      console.log('Fetching videos from:', API);
       const url = platform && platform !== 'all' 
         ? `${API}/videos?platform=${platform}&limit=20`
         : `${API}/videos?limit=40`;
       
+      console.log('API URL:', url);
       const response = await axios.get(url);
+      console.log('API Response:', response.data);
+      
       setVideos(response.data.videos || []);
       setLastUpdated(new Date().toLocaleTimeString());
     } catch (err) {
@@ -317,16 +381,16 @@ function App() {
   }, [selectedPlatform]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50">
       {/* Header */}
-      <header className="bg-white shadow-lg">
+      <header className="bg-white shadow-lg border-b border-gray-100">
         <div className="container mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-center md:text-left mb-4 md:mb-0">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
                 🔥 Viral Daily
               </h1>
-              <p className="text-gray-600 mt-2">
+              <p className="text-gray-600 text-lg">
                 Discover the most viral videos from across the web, updated daily!
               </p>
               {lastUpdated && (
@@ -340,14 +404,14 @@ function App() {
               <button
                 onClick={() => fetchVideos(selectedPlatform)}
                 disabled={loading}
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors"
+                className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 {loading ? '🔄 Loading...' : '🔄 Refresh'}
               </button>
               
               <button
                 onClick={() => setShowSubscriptionModal(true)}
-                className="px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all"
+                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl"
               >
                 🔔 Subscribe
               </button>
@@ -367,18 +431,24 @@ function App() {
         {/* Loading State */}
         {loading && (
           <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500"></div>
-            <p className="mt-4 text-gray-600">Loading viral videos...</p>
+            <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent"></div>
+            <p className="mt-4 text-gray-600 text-lg">Loading viral videos...</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
+              {[...Array(8)].map((_, i) => (
+                <LoadingCard key={i} />
+              ))}
+            </div>
           </div>
         )}
 
         {/* Error State */}
         {error && (
           <div className="text-center py-12">
-            <p className="text-red-500 mb-4">{error}</p>
+            <div className="text-6xl mb-4">😵</div>
+            <p className="text-red-500 mb-4 text-lg">{error}</p>
             <button
               onClick={() => fetchVideos(selectedPlatform)}
-              className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600"
+              className="px-6 py-3 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-all duration-200"
             >
               Try Again
             </button>
@@ -388,16 +458,17 @@ function App() {
         {/* Videos Grid */}
         {!loading && !error && (
           <>
-            <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-800">
+            <div className="text-center mb-8">
+              <h2 className="text-3xl font-bold text-gray-800 mb-2">
                 {selectedPlatform === 'all' 
                   ? `🌟 Top ${videos.length} Viral Videos Today` 
                   : `📱 Top ${videos.length} ${selectedPlatform.toUpperCase()} Videos`
                 }
               </h2>
+              <p className="text-gray-600">Updated every hour with the hottest viral content</p>
             </div>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {videos.map((video, index) => (
                 <VideoCard key={video.id || index} video={video} />
               ))}
@@ -405,7 +476,9 @@ function App() {
 
             {videos.length === 0 && (
               <div className="text-center py-12">
+                <div className="text-6xl mb-4">🔍</div>
                 <p className="text-gray-600 text-lg">No viral videos found for the selected platform.</p>
+                <p className="text-gray-500 mt-2">Try selecting a different platform or refreshing the page.</p>
               </div>
             )}
           </>
@@ -420,12 +493,19 @@ function App() {
       />
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-white py-8 mt-12">
+      <footer className="bg-gradient-to-r from-gray-800 to-gray-900 text-white py-12 mt-16">
         <div className="container mx-auto px-4 text-center">
-          <p className="mb-2">🔥 Viral Daily - Your daily dose of viral content</p>
+          <h3 className="text-2xl font-bold mb-2">🔥 Viral Daily</h3>
+          <p className="text-gray-300 mb-4">Your daily dose of viral content</p>
           <p className="text-sm text-gray-400">
             Aggregating the best viral videos from YouTube, TikTok, Twitter, and Instagram
           </p>
+          <div className="mt-6 flex justify-center space-x-6">
+            <span className="text-gray-400">📺 YouTube</span>
+            <span className="text-gray-400">🎵 TikTok</span>
+            <span className="text-gray-400">🐦 Twitter</span>
+            <span className="text-gray-400">📷 Instagram</span>
+          </div>
         </div>
       </footer>
     </div>
