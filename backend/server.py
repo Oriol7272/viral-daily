@@ -23,6 +23,7 @@ from subscription_plans import SUBSCRIPTION_PLANS, get_plan, get_stripe_price_id
 from advertising import AdvertisingService
 from analytics import AnalyticsService
 from payments import create_payment_router
+from paypal_integration import create_paypal_router
 
 # Stripe integration
 from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionResponse, CheckoutStatusResponse, CheckoutSessionRequest
