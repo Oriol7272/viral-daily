@@ -327,7 +327,7 @@ class ViralDailyAPITester:
         return False
 
     def test_paypal_create_order_authenticated(self):
-        """Test POST /api/payments/paypal/create-order with authentication"""
+        """Test POST /api/payments/paypal/create-order with authentication and real credentials"""
         if not self.test_api_key:
             print("   ⚠️  No API key available, skipping test")
             return False
@@ -337,18 +337,52 @@ class ViralDailyAPITester:
             "billing_cycle": "monthly"
         }
         
-        success, response = self.run_test(
-            "PayPal Create Order (Authenticated)",
-            "POST",
-            "payments/paypal/create-order",
-            503,  # Expected to fail due to missing credentials
-            data=order_data
+        # First check if PayPal is available
+        avail_success, avail_response = self.run_test(
+            "PayPal Availability Pre-check",
+            "GET",
+            "payments/paypal/available",
+            200
         )
         
-        if success:
-            print("   ✅ Properly handles missing PayPal credentials")
-            return True
-        return False
+        if avail_success and avail_response.get('available'):
+            # PayPal is available, expect successful order creation
+            success, response = self.run_test(
+                "PayPal Create Order (Authenticated - Real Credentials)",
+                "POST",
+                "payments/paypal/create-order",
+                200,  # Should succeed with real credentials
+                data=order_data
+            )
+            
+            if success and isinstance(response, dict):
+                required_fields = ['order_id', 'approval_url', 'order_status']
+                missing_fields = [field for field in required_fields if field not in response]
+                
+                if missing_fields:
+                    print(f"   ⚠️  Missing fields: {missing_fields}")
+                    return False
+                else:
+                    print(f"   🎉 PayPal Order Created Successfully!")
+                    print(f"   Order ID: {response['order_id']}")
+                    print(f"   Status: {response['order_status']}")
+                    print(f"   Approval URL: {response['approval_url'][:50] if response['approval_url'] else 'None'}...")
+                    return True
+            return False
+        else:
+            # PayPal not available, expect 503 error
+            success, response = self.run_test(
+                "PayPal Create Order (Authenticated - No Credentials)",
+                "POST",
+                "payments/paypal/create-order",
+                503,  # Expected to fail due to missing credentials
+                data=order_data
+            )
+            
+            if success:
+                print("   ✅ Properly handles missing PayPal credentials")
+                return True
+            return False
 
     def test_paypal_order_status(self):
         """Test GET /api/payments/paypal/order-status/{order_id}"""
