@@ -333,7 +333,7 @@ class ViralDailyAPITester:
                 print(f"   ✅ Live Mode: {'✅ CORRECT' if live_mode_correct else '❌ INCORRECT (Expected: live, Got: ' + str(mode) + ')'}")
                 
                 if available and live_mode_correct:
-                    print("   🎉 PayPal is available in LIVE mode with business account!")
+                    print("   🎉 PayPal is available in LIVE mode with NEW credentials!")
                 elif available:
                     print("   ⚠️  PayPal is available but not in live mode")
                 else:
