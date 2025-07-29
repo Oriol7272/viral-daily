@@ -179,7 +179,8 @@ test_plan:
   current_focus:
     - "PayPal payment button component"
     - "Payment modal with PayPal option"
-  stuck_tasks: []
+  stuck_tasks: 
+    - "PayPal payment integration backend API endpoints"
   test_all: false
   test_priority: "high_first"
 
