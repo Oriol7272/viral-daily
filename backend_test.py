@@ -13,10 +13,18 @@ class ViralDailyAPITester:
         self.test_user = None
         self.test_api_key = None
 
-    def run_test(self, name, method, endpoint, expected_status, data=None, params=None):
+    def run_test(self, name, method, endpoint, expected_status, data=None, params=None, headers=None):
         """Run a single API test"""
         url = f"{self.api_url}/{endpoint}" if endpoint else self.api_url
-        headers = {'Content-Type': 'application/json'}
+        request_headers = {'Content-Type': 'application/json'}
+        
+        # Add authentication headers if available
+        if self.test_api_key:
+            request_headers['Authorization'] = f'Bearer {self.test_api_key}'
+        
+        # Add custom headers
+        if headers:
+            request_headers.update(headers)
 
         self.tests_run += 1
         print(f"\n🔍 Testing {name}...")
@@ -24,9 +32,9 @@ class ViralDailyAPITester:
         
         try:
             if method == 'GET':
-                response = requests.get(url, headers=headers, params=params, timeout=10)
+                response = requests.get(url, headers=request_headers, params=params, timeout=10)
             elif method == 'POST':
-                response = requests.post(url, json=data, headers=headers, timeout=10)
+                response = requests.post(url, json=data, headers=request_headers, timeout=10)
 
             success = response.status_code == expected_status
             if success:
