@@ -89,7 +89,7 @@ class PayPalService:
                         "name": f"Viral Daily {plan.name} Plan",
                         "description": f"{billing_cycle.capitalize()} subscription to Viral Daily {plan.name}",
                         "unit_amount": {
-                            "currency_code": "USD",
+                            "currency_code": "EUR",
                             "value": f"{amount:.2f}"
                         },
                         "quantity": "1",
