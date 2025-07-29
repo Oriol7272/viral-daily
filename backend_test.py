@@ -430,7 +430,7 @@ class ViralDailyAPITester:
                 print(f"❌ Test suite failed: {str(e)}")
         
         # Print final results
-        print("\n" + "=" * 60)
+        print("\n" + "=" * 70)
         print(f"📊 Final Results: {self.tests_passed}/{self.tests_run} tests passed")
         
         # Detailed summary
@@ -438,18 +438,22 @@ class ViralDailyAPITester:
         print(f"📈 Success Rate: {success_rate:.1f}%")
         
         if self.tests_passed == self.tests_run:
-            print("🎉 All tests passed! MONETIZED API is working correctly.")
+            print("🎉 All tests passed! MONETIZED API with PayPal is working correctly.")
             print("💰 Monetization features: ✅ FULLY FUNCTIONAL")
+            print("💳 PayPal integration: ✅ PROPERLY CONFIGURED")
             return 0
         else:
             failed_tests = self.tests_run - self.tests_passed
             print(f"⚠️  {failed_tests} tests failed.")
             if success_rate >= 80:
                 print("💰 Monetization features: ✅ MOSTLY FUNCTIONAL")
+                print("💳 PayPal integration: ✅ MOSTLY FUNCTIONAL")
             elif success_rate >= 60:
                 print("💰 Monetization features: ⚠️  PARTIALLY FUNCTIONAL")
+                print("💳 PayPal integration: ⚠️  PARTIALLY FUNCTIONAL")
             else:
                 print("💰 Monetization features: ❌ NEEDS ATTENTION")
+                print("💳 PayPal integration: ❌ NEEDS ATTENTION")
             return 1
 
 def main():
