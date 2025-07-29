@@ -324,7 +324,7 @@ def create_paypal_router(db) -> APIRouter:
         return {
             "client_id": os.environ.get('PAYPAL_CLIENT_ID'),
             "mode": os.environ.get('PAYPAL_MODE', 'sandbox'),
-            "currency": "USD"
+            "currency": "EUR"
         }
     
     return router
