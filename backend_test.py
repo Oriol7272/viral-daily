@@ -413,17 +413,41 @@ class ViralDailyAPITester:
         """Test GET /api/payments/paypal/order-status/{order_id}"""
         test_order_id = "test_order_123"
         
-        success, response = self.run_test(
-            "PayPal Order Status",
+        # First check if PayPal is available
+        avail_success, avail_response = self.run_test(
+            "PayPal Availability Pre-check (Order Status)",
             "GET",
-            f"payments/paypal/order-status/{test_order_id}",
-            503  # Expected to fail due to missing credentials
+            "payments/paypal/available",
+            200
         )
         
-        if success:
-            print("   ✅ Properly handles missing PayPal credentials")
-            return True
-        return False
+        if avail_success and avail_response.get('available'):
+            # PayPal is available, but test order ID won't exist - expect 500 or 404
+            success, response = self.run_test(
+                "PayPal Order Status (Real Credentials)",
+                "GET",
+                f"payments/paypal/order-status/{test_order_id}",
+                500  # Expected to fail with invalid order ID
+            )
+            
+            if success:
+                print("   ✅ PayPal order status endpoint accessible with real credentials")
+                print("   ℹ️  Failed as expected due to invalid test order ID")
+                return True
+            return False
+        else:
+            # PayPal not available, expect 503 error
+            success, response = self.run_test(
+                "PayPal Order Status (No Credentials)",
+                "GET",
+                f"payments/paypal/order-status/{test_order_id}",
+                503  # Expected to fail due to missing credentials
+            )
+            
+            if success:
+                print("   ✅ Properly handles missing PayPal credentials")
+                return True
+            return False
 
     def test_paypal_webhook(self):
         """Test POST /api/payments/paypal/webhook"""
