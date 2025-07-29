@@ -125,6 +125,9 @@ backend:
       - working: true
         agent: "testing"
         comment: "BUSINESS ACCOUNT INTEGRATION TESTED: PayPal configuration is PERFECT - Live mode ✅, EUR currency ✅, Business client ID verified ✅ (BAAy0wcaeIusarE_4J84vqysPuHWpDnM392axNEkhvOpHPKQWk5bRGx0tfLH8vpuOCCJG_7JV0OiNxG_48). PayPal shows as available in live mode. However, order creation fails with 'Client Authentication failed' error, indicating potential mismatch between client ID and secret or business account activation issue. Configuration endpoints work perfectly, error handling is correct, webhook processing works. Core integration is solid but requires PayPal credential verification."
+      - working: false
+        agent: "testing"
+        comment: "CONFIRMED BUSINESS ACCOUNT CREDENTIALS RE-TESTED: PayPal configuration remains PERFECT (Live mode ✅, EUR currency ✅, Business client ID verified ✅). PayPal availability confirmed in live mode. However, order creation consistently fails with 'Client Authentication failed' error despite user confirming credentials are matching pairs. Test results: 15/20 tests passed (75% success rate). Configuration endpoints work flawlessly, webhook processing functional, error handling robust. CRITICAL ISSUE: PayPal API returns 'invalid_client' error during order creation, suggesting either: 1) Credentials are not actually matching pairs, 2) Business account not activated for live API access, 3) Application not properly configured in PayPal Developer Dashboard. Recommendation: User must verify in PayPal Developer Dashboard that live application is created and activated with these exact credentials."
 
   - task: "PayPal router registration in main server"
     implemented: true
