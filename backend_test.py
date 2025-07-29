@@ -277,22 +277,22 @@ class ViralDailyAPITester:
                 print(f"   PayPal Mode: {mode}")
                 print(f"   Currency: {currency}")
                 
-                # Verify business account configuration
-                business_client_id = "BAAy0wcaeIusarE_4J84vqysPuHWpDnM392axNEkhvOpHPKQWk5bRGx0tfLH8vpuOCCJG_7JV0OiNxG_48"
+                # Verify NEW live credentials provided by user
+                expected_client_id = "BAAjUw1nb84moRC0rrJOZtICaamy0n3pn_wL_qsvsw7w8fE8P6bKNU9cmWVmnkzwj5DJHkYU-nyM2wZtqI"
                 
                 # Test results
                 mode_correct = mode == "live"
                 currency_correct = currency == "EUR"
-                client_id_correct = client_id == business_client_id
+                client_id_correct = client_id == expected_client_id
                 
                 print(f"   ✅ Live Mode: {'✅ CORRECT' if mode_correct else '❌ INCORRECT (Expected: live, Got: ' + str(mode) + ')'}")
                 print(f"   ✅ EUR Currency: {'✅ CORRECT' if currency_correct else '❌ INCORRECT (Expected: EUR, Got: ' + str(currency) + ')'}")
-                print(f"   ✅ Business Client ID: {'✅ CORRECT' if client_id_correct else '❌ INCORRECT'}")
+                print(f"   ✅ NEW Live Client ID: {'✅ CORRECT' if client_id_correct else '❌ INCORRECT'}")
                 
                 if client_id_correct:
-                    print(f"   🎉 Business account client ID verified!")
+                    print(f"   🎉 NEW live client ID verified!")
                 else:
-                    print(f"   ❌ Expected business client ID: {business_client_id[:20]}...")
+                    print(f"   ❌ Expected NEW client ID: {expected_client_id[:20]}...")
                     print(f"   ❌ Actual client ID: {client_id[:20] if client_id else 'None'}...")
                 
                 # Overall success
