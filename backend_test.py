@@ -323,9 +323,12 @@ class ViralDailyAPITester:
             ("Root Endpoint", self.test_root_endpoint),
             ("Get All Videos", self.test_get_all_videos),
             ("Platform Filtering", self.test_platform_filtering),
+            ("Viral Scoring Algorithm", self.test_viral_scoring_algorithm),
+            ("API Resilience", self.test_api_resilience),
             ("Subscription Creation", self.test_subscription_creation),
             ("Get Subscriptions", self.test_get_subscriptions),
-            ("Video History", self.test_video_history)
+            ("Video History", self.test_video_history),
+            ("Daily Delivery", self.test_daily_delivery)
         ]
         
         for test_name, test_func in tests:
