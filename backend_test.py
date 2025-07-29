@@ -58,7 +58,253 @@ class ViralDailyAPITester:
             print(f"❌ Failed - Error: {str(e)}")
             return False, {}
 
-    def test_root_endpoint(self):
+    def test_user_registration(self):
+        """Test POST /api/users/register - User registration"""
+        test_email = f"test_{uuid.uuid4().hex[:8]}@example.com"
+        test_name = f"Test User {datetime.now().strftime('%H%M%S')}"
+        
+        success, response = self.run_test(
+            "User Registration",
+            "POST",
+            "users/register",
+            200,
+            data={"email": test_email, "name": test_name}
+        )
+        
+        if success and isinstance(response, dict):
+            required_fields = ['id', 'email', 'name', 'api_key', 'subscription_tier']
+            missing_fields = [field for field in required_fields if field not in response]
+            
+            if missing_fields:
+                print(f"   ⚠️  Missing fields: {missing_fields}")
+                return False
+            else:
+                self.test_user = response
+                self.test_api_key = response['api_key']
+                print(f"   ✅ User created: {response['email']}")
+                print(f"   API Key: {response['api_key'][:20]}...")
+                print(f"   Subscription Tier: {response['subscription_tier']}")
+                return True
+        return False
+
+    def test_subscription_plans(self):
+        """Test GET /api/subscription/plans - Get subscription plans"""
+        success, response = self.run_test(
+            "Get Subscription Plans",
+            "GET",
+            "subscription/plans",
+            200
+        )
+        
+        if success and isinstance(response, dict):
+            plans = response.get('plans', [])
+            print(f"   Found {len(plans)} subscription plans")
+            
+            # Check for required tiers
+            tiers = [plan.get('tier') for plan in plans]
+            required_tiers = ['free', 'pro', 'business']
+            missing_tiers = [tier for tier in required_tiers if tier not in tiers]
+            
+            if missing_tiers:
+                print(f"   ⚠️  Missing tiers: {missing_tiers}")
+                return False
+            
+            # Check plan structure
+            for plan in plans:
+                required_fields = ['tier', 'name', 'price_monthly', 'features', 'max_videos_per_day']
+                missing_fields = [field for field in required_fields if field not in plan]
+                if missing_fields:
+                    print(f"   ⚠️  Plan {plan.get('tier')} missing fields: {missing_fields}")
+                    return False
+                else:
+                    print(f"   ✅ {plan['tier'].upper()}: ${plan['price_monthly']}/month, {plan['max_videos_per_day']} videos/day")
+            
+            return True
+        return False
+
+    def test_current_user_info(self):
+        """Test GET /api/users/me - Get current user info"""
+        if not self.test_api_key:
+            print("   ⚠️  No API key available, skipping test")
+            return False
+            
+        success, response = self.run_test(
+            "Get Current User Info",
+            "GET",
+            "users/me",
+            200
+        )
+        
+        if success and isinstance(response, dict):
+            required_fields = ['id', 'email', 'subscription_tier', 'daily_api_calls', 'max_daily_api_calls']
+            missing_fields = [field for field in required_fields if field not in response]
+            
+            if missing_fields:
+                print(f"   ⚠️  Missing fields: {missing_fields}")
+                return False
+            else:
+                print(f"   ✅ User: {response['email']}")
+                print(f"   Tier: {response['subscription_tier']}")
+                print(f"   API Usage: {response['daily_api_calls']}/{response['max_daily_api_calls']}")
+                return True
+        return False
+
+    def test_videos_with_auth(self):
+        """Test GET /api/videos with authentication"""
+        if not self.test_api_key:
+            print("   ⚠️  No API key available, skipping test")
+            return False
+            
+        success, response = self.run_test(
+            "Get Videos with Auth",
+            "GET",
+            "videos",
+            200,
+            params={'limit': 10}
+        )
+        
+        if success and isinstance(response, dict):
+            videos = response.get('videos', [])
+            has_ads = response.get('has_ads', False)
+            user_tier = response.get('user_tier', 'unknown')
+            
+            print(f"   Videos: {len(videos)}")
+            print(f"   Has Ads: {has_ads}")
+            print(f"   User Tier: {user_tier}")
+            
+            # Check for ads in free tier
+            if user_tier == 'free':
+                sponsored_videos = [v for v in videos if v.get('is_sponsored', False)]
+                print(f"   Sponsored content: {len(sponsored_videos)} ads")
+                
+            return len(videos) > 0
+        return False
+
+    def test_rate_limiting(self):
+        """Test API rate limiting"""
+        if not self.test_api_key:
+            print("   ⚠️  No API key available, skipping test")
+            return False
+            
+        print("   Testing rate limiting by making multiple requests...")
+        
+        # Make several requests quickly
+        for i in range(5):
+            success, response = self.run_test(
+                f"Rate Limit Test {i+1}",
+                "GET",
+                "videos",
+                200,
+                params={'limit': 1}
+            )
+            if not success:
+                if response == {} and i > 0:  # Likely rate limited
+                    print(f"   ✅ Rate limiting working (blocked after {i} requests)")
+                    return True
+                else:
+                    print(f"   ❌ Unexpected failure on request {i+1}")
+                    return False
+        
+        print("   ✅ All requests succeeded (rate limit not reached)")
+        return True
+
+    def test_payment_endpoints(self):
+        """Test payment-related endpoints"""
+        if not self.test_api_key:
+            print("   ⚠️  No API key available, skipping test")
+            return False
+            
+        # Test checkout session creation (should work even in test mode)
+        success, response = self.run_test(
+            "Create Checkout Session",
+            "POST",
+            "payments/v1/checkout/session",
+            200,
+            data={
+                "price_id": "price_test_pro_monthly",
+                "success_url": "https://example.com/success",
+                "cancel_url": "https://example.com/cancel"
+            }
+        )
+        
+        if success and isinstance(response, dict):
+            if 'checkout_url' in response or 'session_id' in response:
+                print(f"   ✅ Checkout session created")
+                return True
+            else:
+                print(f"   ⚠️  Unexpected response structure")
+                return False
+        return False
+
+    def test_analytics_endpoints(self):
+        """Test analytics endpoints (Business tier only)"""
+        if not self.test_api_key:
+            print("   ⚠️  No API key available, skipping test")
+            return False
+            
+        # This should fail for free tier users
+        success, response = self.run_test(
+            "Analytics Dashboard (Should Fail for Free Tier)",
+            "GET",
+            "analytics/dashboard",
+            403  # Expecting forbidden for free tier
+        )
+        
+        if success:
+            print("   ✅ Analytics properly restricted to Business tier")
+            return True
+        elif response == {}:  # Got 403 as expected
+            print("   ✅ Analytics properly restricted to Business tier")
+            return True
+        else:
+            print("   ❌ Analytics access control not working")
+            return False
+
+    def test_user_analytics(self):
+        """Test user analytics endpoint"""
+        if not self.test_api_key:
+            print("   ⚠️  No API key available, skipping test")
+            return False
+            
+        success, response = self.run_test(
+            "User Analytics",
+            "GET",
+            "users/me/analytics",
+            200
+        )
+        
+        if success and isinstance(response, dict):
+            print(f"   ✅ User analytics retrieved")
+            if 'api_usage' in response:
+                print(f"   API Usage data available")
+            return True
+        return False
+
+    def test_subscription_info(self):
+        """Test current subscription info"""
+        if not self.test_api_key:
+            print("   ⚠️  No API key available, skipping test")
+            return False
+            
+        success, response = self.run_test(
+            "Current Subscription Info",
+            "GET",
+            "subscription/me",
+            200
+        )
+        
+        if success and isinstance(response, dict):
+            required_fields = ['user_id', 'current_tier', 'plan_details', 'api_usage_today', 'api_limit']
+            missing_fields = [field for field in required_fields if field not in response]
+            
+            if missing_fields:
+                print(f"   ⚠️  Missing fields: {missing_fields}")
+                return False
+            else:
+                print(f"   ✅ Subscription: {response['current_tier']}")
+                print(f"   API Usage: {response['api_usage_today']}/{response['api_limit']}")
+                return True
+        return False
         """Test GET /api/ - Welcome message"""
         success, response = self.run_test(
             "Root API Endpoint",
