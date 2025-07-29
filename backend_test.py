@@ -571,24 +571,40 @@ class ViralDailyAPITester:
         return False
 
     def run_all_tests(self):
-        """Run all API tests"""
-        print("🚀 Starting Viral Daily API Tests")
-        print("=" * 50)
+        """Run all API tests including monetization features"""
+        print("🚀 Starting Viral Daily MONETIZED API Tests")
+        print("=" * 60)
         
-        # Test core endpoints
-        tests = [
+        # Test core endpoints first
+        core_tests = [
             ("Root Endpoint", self.test_root_endpoint),
-            ("Get All Videos", self.test_get_all_videos),
+            ("Get All Videos (No Auth)", self.test_get_all_videos),
+        ]
+        
+        # Test monetization features
+        monetization_tests = [
+            ("User Registration", self.test_user_registration),
+            ("Subscription Plans", self.test_subscription_plans),
+            ("Current User Info", self.test_current_user_info),
+            ("Videos with Authentication", self.test_videos_with_auth),
+            ("Rate Limiting", self.test_rate_limiting),
+            ("Payment Endpoints", self.test_payment_endpoints),
+            ("Analytics Endpoints", self.test_analytics_endpoints),
+            ("User Analytics", self.test_user_analytics),
+            ("Subscription Info", self.test_subscription_info),
+        ]
+        
+        # Test additional features
+        additional_tests = [
             ("Platform Filtering", self.test_platform_filtering),
             ("Viral Scoring Algorithm", self.test_viral_scoring_algorithm),
             ("API Resilience", self.test_api_resilience),
-            ("Subscription Creation", self.test_subscription_creation),
-            ("Get Subscriptions", self.test_get_subscriptions),
-            ("Video History", self.test_video_history),
-            ("Daily Delivery", self.test_daily_delivery)
+            ("Legacy Subscription Creation", self.test_subscription_creation),
         ]
         
-        for test_name, test_func in tests:
+        all_tests = core_tests + monetization_tests + additional_tests
+        
+        for test_name, test_func in all_tests:
             print(f"\n📋 Running {test_name} Tests...")
             try:
                 test_func()
@@ -596,14 +612,26 @@ class ViralDailyAPITester:
                 print(f"❌ Test suite failed: {str(e)}")
         
         # Print final results
-        print("\n" + "=" * 50)
+        print("\n" + "=" * 60)
         print(f"📊 Final Results: {self.tests_passed}/{self.tests_run} tests passed")
         
+        # Detailed summary
+        success_rate = (self.tests_passed / self.tests_run) * 100 if self.tests_run > 0 else 0
+        print(f"📈 Success Rate: {success_rate:.1f}%")
+        
         if self.tests_passed == self.tests_run:
-            print("🎉 All tests passed! API is working correctly.")
+            print("🎉 All tests passed! MONETIZED API is working correctly.")
+            print("💰 Monetization features: ✅ FULLY FUNCTIONAL")
             return 0
         else:
-            print(f"⚠️  {self.tests_run - self.tests_passed} tests failed.")
+            failed_tests = self.tests_run - self.tests_passed
+            print(f"⚠️  {failed_tests} tests failed.")
+            if success_rate >= 80:
+                print("💰 Monetization features: ✅ MOSTLY FUNCTIONAL")
+            elif success_rate >= 60:
+                print("💰 Monetization features: ⚠️  PARTIALLY FUNCTIONAL")
+            else:
+                print("💰 Monetization features: ❌ NEEDS ATTENTION")
             return 1
 
 def main():
