@@ -253,9 +253,9 @@ class ViralDailyAPITester:
         return False
 
     def test_paypal_config(self):
-        """Test GET /api/payments/paypal/config - PayPal configuration"""
+        """Test GET /api/payments/paypal/config - PayPal configuration with business account"""
         success, response = self.run_test(
-            "PayPal Configuration",
+            "PayPal Configuration (Business Account)",
             "GET",
             "payments/paypal/config",
             200
@@ -266,18 +266,43 @@ class ViralDailyAPITester:
             missing_fields = [field for field in required_fields if field not in response]
             
             if missing_fields:
-                print(f"   ⚠️  Missing fields: {missing_fields}")
+                print(f"   ❌ Missing fields: {missing_fields}")
                 return False
             else:
-                print(f"   ✅ PayPal Mode: {response['mode']}")
-                print(f"   Currency: {response['currency']}")
+                # Check specific business account requirements
+                mode = response['mode']
+                currency = response['currency']
                 client_id = response['client_id']
-                if client_id and len(client_id) > 20:
-                    print(f"   Client ID: {client_id[:20]}... (Real credentials detected!)")
-                    print("   🎉 PayPal configuration looks valid!")
+                
+                print(f"   PayPal Mode: {mode}")
+                print(f"   Currency: {currency}")
+                
+                # Verify business account configuration
+                business_client_id = "BAAy0wcaeIusarE_4J84vqysPuHWpDnM392axNEkhvOpHPKQWk5bRGx0tfLH8vpuOCCJG_7JV0OiNxG_48"
+                
+                # Test results
+                mode_correct = mode == "live"
+                currency_correct = currency == "EUR"
+                client_id_correct = client_id == business_client_id
+                
+                print(f"   ✅ Live Mode: {'✅ CORRECT' if mode_correct else '❌ INCORRECT (Expected: live, Got: ' + str(mode) + ')'}")
+                print(f"   ✅ EUR Currency: {'✅ CORRECT' if currency_correct else '❌ INCORRECT (Expected: EUR, Got: ' + str(currency) + ')'}")
+                print(f"   ✅ Business Client ID: {'✅ CORRECT' if client_id_correct else '❌ INCORRECT'}")
+                
+                if client_id_correct:
+                    print(f"   🎉 Business account client ID verified!")
                 else:
-                    print(f"   Client ID: {client_id or 'Not configured'}")
-                return True
+                    print(f"   ❌ Expected business client ID: {business_client_id[:20]}...")
+                    print(f"   ❌ Actual client ID: {client_id[:20] if client_id else 'None'}...")
+                
+                # Overall success
+                all_correct = mode_correct and currency_correct and client_id_correct
+                if all_correct:
+                    print("   🎉 PayPal business account configuration is PERFECT!")
+                else:
+                    print("   ⚠️  PayPal business account configuration has issues")
+                
+                return all_correct
         return False
 
     def test_paypal_availability(self):
