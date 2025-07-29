@@ -182,6 +182,8 @@ agent_communication:
     message: "Added PayPal integration testing data. PayPal backend integration appears complete but needs credentials and testing. Frontend components are implemented. Need to restart services and test integration."
   - agent: "main"
     message: "Updated PayPal credentials in backend/.env file with real client ID and secret provided by user. Restarted backend service. PayPal integration should now be fully functional."
+  - agent: "main"
+    message: "Updated PayPal configuration with business account credentials. Changed client ID to business account (BAAy0wcaeIusarE_4J84vqysPuHWpDnM392axNEkhvOpHPKQWk5bRGx0tfLH8vpuOCCJG_7JV0OiNxG_48), switched to live mode, and updated currency from USD to EUR. Backend restarted successfully."
   - agent: "testing"
     message: "PayPal backend API testing completed. All 5 PayPal endpoints tested: 1) /config endpoint returns proper configuration (client_id, mode, currency), 2) /available endpoint correctly reports PayPal availability status, 3) /create-order endpoints properly handle missing credentials with appropriate error responses, 4) /order-status endpoint handles missing credentials correctly, 5) /webhook endpoint processes webhook events successfully. PayPal integration is properly implemented and ready for production with real credentials. Backend API contract is solid and error handling is appropriate."
   - agent: "testing"
