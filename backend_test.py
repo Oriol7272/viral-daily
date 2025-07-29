@@ -2,6 +2,7 @@ import requests
 import sys
 import json
 from datetime import datetime
+import uuid
 
 class ViralDailyAPITester:
     def __init__(self, base_url="https://42ddaa94-2f87-4bfa-b3ea-e8e4d90c7075.preview.emergentagent.com"):
@@ -9,6 +10,8 @@ class ViralDailyAPITester:
         self.api_url = f"{base_url}/api"
         self.tests_run = 0
         self.tests_passed = 0
+        self.test_user = None
+        self.test_api_key = None
 
     def run_test(self, name, method, endpoint, expected_status, data=None, params=None):
         """Run a single API test"""
