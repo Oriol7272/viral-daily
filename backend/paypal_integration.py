@@ -76,11 +76,11 @@ class PayPalService:
                     "reference_id": f"viral_daily_{subscription_tier.value}_{billing_cycle}",
                     "description": f"Viral Daily {plan.name} Plan - {billing_cycle.capitalize()} Billing",
                     "amount": {
-                        "currency_code": "USD",
+                        "currency_code": "EUR",
                         "value": f"{amount:.2f}",
                         "breakdown": {
                             "item_total": {
-                                "currency_code": "USD",
+                                "currency_code": "EUR",
                                 "value": f"{amount:.2f}"
                             }
                         }
