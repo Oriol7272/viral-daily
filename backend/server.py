@@ -283,9 +283,87 @@ class VideoAggregator:
         return videos
 
     async def fetch_twitter_viral_videos(self, limit: int = 10) -> List[ViralVideo]:
-        """Fetch viral videos from Twitter/X - Enhanced mock data"""
+        """Fetch viral videos from Twitter/X using API v2"""
         videos = []
         
+        if not self.twitter_bearer_token:
+            logging.warning("Twitter Bearer token not available, returning enhanced mock data")
+            return await self._get_twitter_mock_data(limit)
+        
+        try:
+            import tweepy
+            
+            # Initialize Twitter API client
+            client = tweepy.Client(bearer_token=self.twitter_bearer_token)
+            
+            # Search for tweets with videos that have high engagement
+            search_query = "(has:videos OR has:media) -is:retweet min_faves:1000 lang:en"
+            
+            tweets = client.search_recent_tweets(
+                query=search_query,
+                max_results=min(limit, 100),  # API limit
+                tweet_fields=['created_at', 'public_metrics', 'author_id', 'attachments'],
+                media_fields=['url', 'preview_image_url', 'type', 'duration_ms'],
+                expansions=['attachments.media_keys', 'author_id'],
+                user_fields=['username', 'name']
+            )
+            
+            if not tweets.data:
+                logging.warning("No Twitter data found, returning mock data")
+                return await self._get_twitter_mock_data(limit)
+            
+            # Process tweets
+            for tweet in tweets.data[:limit]:
+                try:
+                    metrics = tweet.public_metrics
+                    
+                    # Get author info
+                    author_username = "Unknown"
+                    if tweets.includes and 'users' in tweets.includes:
+                        for user in tweets.includes['users']:
+                            if user.id == tweet.author_id:
+                                author_username = f"@{user.username}"
+                                break
+                    
+                    # Calculate viral score
+                    likes = metrics['like_count']
+                    retweets = metrics['retweet_count']
+                    replies = metrics['reply_count']
+                    
+                    # Twitter viral score calculation
+                    engagement_score = likes + (retweets * 3) + (replies * 2)
+                    viral_score = min(90.0, max(10.0, engagement_score / 1000))
+                    
+                    # Create video object
+                    video = ViralVideo(
+                        title=tweet.text[:100] + "..." if len(tweet.text) > 100 else tweet.text,
+                        url=f"https://twitter.com/i/status/{tweet.id}",
+                        thumbnail=f"https://via.placeholder.com/400x225/1DA1F2/FFFFFF?text=Twitter+Video",
+                        platform=Platform.TWITTER,
+                        views=metrics.get('impression_count', 0),
+                        likes=likes,
+                        shares=retweets,
+                        author=author_username,
+                        viral_score=viral_score,
+                        published_at=tweet.created_at.replace(tzinfo=None) if tweet.created_at else datetime.utcnow()
+                    )
+                    videos.append(video)
+                    
+                except Exception as e:
+                    logging.error(f"Error processing Twitter tweet: {e}")
+                    continue
+                    
+        except Exception as e:
+            logging.error(f"Twitter API error: {e}")
+            logging.warning("Falling back to Twitter mock data")
+            return await self._get_twitter_mock_data(limit)
+        
+        # Sort by viral score
+        videos.sort(key=lambda x: x.viral_score, reverse=True)
+        return videos
+
+    async def _get_twitter_mock_data(self, limit: int) -> List[ViralVideo]:
+        """Enhanced mock data for Twitter"""
         twitter_titles = [
             "This video has me CRYING 😂😂😂",
             "Twitter do your thing and make this viral",
@@ -299,6 +377,7 @@ class VideoAggregator:
             "Twitter main character of the day:"
         ]
         
+        videos = []
         for i in range(limit):
             video = ViralVideo(
                 title=twitter_titles[i % len(twitter_titles)],
@@ -313,7 +392,6 @@ class VideoAggregator:
                 published_at=datetime.utcnow() - timedelta(hours=i * 3)
             )
             videos.append(video)
-            
         return videos
 
     async def fetch_instagram_viral_videos(self, limit: int = 10) -> List[ViralVideo]:
