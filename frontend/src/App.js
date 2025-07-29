@@ -75,24 +75,17 @@ const VideoCard = ({ video }) => {
 
   const getReliableThumbnail = () => {
     if (imageError || !video.thumbnail) {
-      // Create a custom thumbnail based on platform
+      // Use a simple placeholder service instead of btoa
       const colors = {
-        youtube: '#FF0000',
-        tiktok: '#000000',
-        twitter: '#1DA1F2',
-        instagram: '#E4405F'
+        youtube: 'FF0000',
+        tiktok: '000000',
+        twitter: '1DA1F2',
+        instagram: 'E4405F'
       };
-      const bgColor = colors[video.platform] || '#6B7280';
-      const icon = getPlatformIcon(video.platform);
+      const bgColor = colors[video.platform] || '6B7280';
+      const platformText = video.platform.toUpperCase();
       
-      return `data:image/svg+xml;base64,${btoa(`
-        <svg width="400" height="225" xmlns="http://www.w3.org/2000/svg">
-          <rect width="400" height="225" fill="${bgColor}"/>
-          <text x="200" y="100" text-anchor="middle" fill="white" font-size="48">${icon}</text>
-          <text x="200" y="140" text-anchor="middle" fill="white" font-size="18" font-weight="bold">${video.platform.toUpperCase()}</text>
-          <text x="200" y="165" text-anchor="middle" fill="white" font-size="14">🔥 ${video.viral_score?.toFixed(0) || 'N/A'} Viral Score</text>
-        </svg>
-      `)}`;
+      return `https://via.placeholder.com/400x225/${bgColor}/FFFFFF?text=${platformText}+VIDEO`;
     }
     return video.thumbnail;
   };
