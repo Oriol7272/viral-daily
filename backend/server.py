@@ -681,6 +681,7 @@ async def get_platform_analytics(
 
 # Include routers
 app.include_router(api_router)
+app.include_router(payments_router)
 
 app.add_middleware(
     CORSMiddleware,
