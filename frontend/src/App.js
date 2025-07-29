@@ -353,6 +353,66 @@ function App() {
   const [selectedPlatform, setSelectedPlatform] = useState('all');
   const [showSubscriptionModal, setShowSubscriptionModal] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
+  
+  // Monetization states
+  const [currentUser, setCurrentUser] = useState(null);
+  const [showPricingPage, setShowPricingPage] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [showUserDashboard, setShowUserDashboard] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState(null);
+  const [billingCycle, setBillingCycle] = useState('monthly');
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+
+  useEffect(() => {
+    // Check for stored user data
+    const storedUser = localStorage.getItem('viralDailyUser');
+    if (storedUser) {
+      try {
+        const userData = JSON.parse(storedUser);
+        setCurrentUser(userData);
+        verifyUser(userData);
+      } catch (error) {
+        console.error('Error parsing stored user data:', error);
+        localStorage.removeItem('viralDailyUser');
+      }
+    }
+    
+    fetchVideos(selectedPlatform);
+  }, [selectedPlatform]);
+
+  const verifyUser = async (userData) => {
+    try {
+      const response = await axios.get(`${API}/users/me`, {
+        headers: { 'Authorization': `Bearer ${userData.api_key}` }
+      });
+      
+      // Update user data if different
+      if (JSON.stringify(response.data) !== JSON.stringify(userData)) {
+        setCurrentUser(response.data);
+        localStorage.setItem('viralDailyUser', JSON.stringify(response.data));
+      }
+    } catch (error) {
+      console.error('Error verifying user:', error);
+      // Clear invalid user data
+      setCurrentUser(null);
+      localStorage.removeItem('viralDailyUser');
+    }
+  };
+
+  const registerUser = async (email) => {
+    try {
+      const response = await axios.post(`${API}/users/register`, { email });
+      const userData = response.data;
+      
+      setCurrentUser(userData);
+      localStorage.setItem('viralDailyUser', JSON.stringify(userData));
+      
+      return userData;
+    } catch (error) {
+      console.error('Error registering user:', error);
+      throw error;
+    }
+  };
 
   const fetchVideos = async (platform = null) => {
     setLoading(true);
@@ -365,7 +425,13 @@ function App() {
         : `${API}/videos?limit=40`;
       
       console.log('API URL:', url);
-      const response = await axios.get(url);
+      
+      const headers = {};
+      if (currentUser?.api_key) {
+        headers['Authorization'] = `Bearer ${currentUser.api_key}`;
+      }
+      
+      const response = await axios.get(url, { headers });
       console.log('API Response:', response.data);
       
       setVideos(response.data.videos || []);
@@ -389,9 +455,65 @@ function App() {
     }
   };
 
-  useEffect(() => {
+  const handlePlanSelect = async (plan, cycle) => {
+    setBillingCycle(cycle);
+    setSelectedPlan(plan);
+    
+    if (plan.tier === 'free') {
+      // Handle free plan signup
+      if (!currentUser) {
+        const email = prompt('Enter your email to get started:');
+        if (email) {
+          try {
+            await registerUser(email);
+            alert('Successfully signed up for the free plan! 🎉');
+            setShowPricingPage(false);
+          } catch (error) {
+            alert('Failed to sign up. Please try again.');
+          }
+        }
+      } else {
+        alert('You are already on the free plan!');
+      }
+    } else {
+      // Handle premium plan upgrade
+      if (!currentUser) {
+        const email = prompt('Enter your email to continue:');
+        if (email) {
+          try {
+            await registerUser(email);
+          } catch (error) {
+            alert('Failed to create account. Please try again.');
+            return;
+          }
+        } else {
+          return;
+        }
+      }
+      
+      setShowPaymentModal(true);
+      setShowPricingPage(false);
+    }
+  };
+
+  const handleLogout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem('viralDailyUser');
+    setUserMenuOpen(false);
+    // Refresh videos to get free tier data
     fetchVideos(selectedPlatform);
-  }, [selectedPlatform]);
+  };
+
+  const getTierBadge = (tier) => {
+    switch (tier) {
+      case 'pro':
+        return <Crown className="w-4 h-4 text-yellow-500" />;
+      case 'business':
+        return <Crown className="w-4 h-4 text-purple-500" />;
+      default:
+        return null;
+    }
+  };
 
   // Auto-refresh every 30 minutes
   useEffect(() => {
@@ -400,136 +522,285 @@ function App() {
     }, 30 * 60 * 1000);
 
     return () => clearInterval(interval);
-  }, [selectedPlatform]);
+  }, [selectedPlatform, currentUser]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-pink-50">
-      {/* Header */}
-      <header className="bg-white shadow-lg border-b border-gray-100">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="text-center md:text-left mb-4 md:mb-0">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-                🔥 Viral Daily
+      {/* Pricing Page */}
+      {showPricingPage && (
+        <div className="fixed inset-0 bg-white z-50 overflow-y-auto">
+          <div className="container mx-auto px-4 py-8">
+            <div className="text-center mb-8">
+              <button
+                onClick={() => setShowPricingPage(false)}
+                className="absolute top-4 left-4 text-gray-600 hover:text-gray-800"
+              >
+                ← Back to Videos
+              </button>
+              <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+                Choose Your Plan
               </h1>
-              <p className="text-gray-600 text-lg">
-                Discover the most viral videos from across the web, updated daily!
+              <p className="text-xl text-gray-600">
+                Unlock the full power of viral content discovery
               </p>
-              {lastUpdated && (
-                <p className="text-sm text-gray-500 mt-1">
-                  Last updated: {lastUpdated}
-                </p>
-              )}
             </div>
             
-            <div className="flex gap-3">
-              <button
-                onClick={() => fetchVideos(selectedPlatform)}
-                disabled={loading}
-                className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                {loading ? '🔄 Loading...' : '🔄 Refresh'}
-              </button>
-              
-              <button
-                onClick={() => setShowSubscriptionModal(true)}
-                className="px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-xl hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-lg hover:shadow-xl"
-              >
-                🔔 Subscribe
-              </button>
-            </div>
+            <SubscriptionPlans 
+              onSelectPlan={handlePlanSelect}
+              currentUser={currentUser}
+            />
           </div>
         </div>
-      </header>
+      )}
 
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
-        {/* Platform Filter */}
-        <PlatformFilter 
-          selectedPlatform={selectedPlatform}
-          onPlatformChange={setSelectedPlatform}
-        />
-
-        {/* Loading State */}
-        {loading && (
-          <div className="text-center py-12">
-            <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent"></div>
-            <p className="mt-4 text-gray-600 text-lg">Loading viral videos...</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
-              {[...Array(8)].map((_, i) => (
-                <LoadingCard key={i} />
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Error State */}
-        {error && (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">😵</div>
-            <p className="text-red-500 mb-4 text-lg">{error}</p>
-            <button
-              onClick={() => fetchVideos(selectedPlatform)}
-              className="px-6 py-3 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-all duration-200"
-            >
-              Try Again
-            </button>
-          </div>
-        )}
-
-        {/* Videos Grid */}
-        {!loading && !error && (
-          <>
-            <div className="text-center mb-8">
-              <h2 className="text-3xl font-bold text-gray-800 mb-2">
-                {selectedPlatform === 'all' 
-                  ? `🌟 Top ${videos.length} Viral Videos Today` 
-                  : `📱 Top ${videos.length} ${selectedPlatform.toUpperCase()} Videos`
-                }
-              </h2>
-              <p className="text-gray-600">Updated every hour with the hottest viral content</p>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {videos.map((video, index) => (
-                <VideoCard key={video.id || index} video={video} />
-              ))}
-            </div>
-
-            {videos.length === 0 && (
-              <div className="text-center py-12">
-                <div className="text-6xl mb-4">🔍</div>
-                <p className="text-gray-600 text-lg">No viral videos found for the selected platform.</p>
-                <p className="text-gray-500 mt-2">Try selecting a different platform or refreshing the page.</p>
-              </div>
-            )}
-          </>
-        )}
-      </main>
-
-      {/* Subscription Modal */}
-      <SubscriptionModal
-        isOpen={showSubscriptionModal}
-        onClose={() => setShowSubscriptionModal(false)}
-        onSubscribe={handleSubscribe}
+      {/* Payment Modal */}
+      <PaymentModal
+        isOpen={showPaymentModal}
+        onClose={() => setShowPaymentModal(false)}
+        selectedPlan={selectedPlan}
+        billingCycle={billingCycle}
+        user={currentUser}
       />
 
-      {/* Footer */}
-      <footer className="bg-gradient-to-r from-gray-800 to-gray-900 text-white py-12 mt-16">
-        <div className="container mx-auto px-4 text-center">
-          <h3 className="text-2xl font-bold mb-2">🔥 Viral Daily</h3>
-          <p className="text-gray-300 mb-4">Your daily dose of viral content</p>
-          <p className="text-sm text-gray-400">
-            Aggregating the best viral videos from YouTube, TikTok, Twitter, and Instagram
-          </p>
-          <div className="mt-6 flex justify-center space-x-6">
-            <span className="text-gray-400">📺 YouTube</span>
-            <span className="text-gray-400">🎵 TikTok</span>
-            <span className="text-gray-400">🐦 Twitter</span>
-            <span className="text-gray-400">📷 Instagram</span>
-          </div>
-        </div>
-      </footer>
+      {/* User Dashboard */}
+      {showUserDashboard && currentUser && (
+        <UserDashboard
+          user={currentUser}
+          onClose={() => setShowUserDashboard(false)}
+        />
+      )}
+
+      {/* Main App Content */}
+      {!showPricingPage && (
+        <>
+          {/* Header */}
+          <header className="bg-white shadow-lg border-b border-gray-100">
+            <div className="container mx-auto px-4 py-6">
+              <div className="flex flex-col md:flex-row justify-between items-center">
+                <div className="text-center md:text-left mb-4 md:mb-0">
+                  <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+                    🔥 Viral Daily
+                  </h1>
+                  <p className="text-gray-600 text-lg">
+                    Discover the most viral videos from across the web, updated daily!
+                  </p>
+                  {lastUpdated && (
+                    <p className="text-sm text-gray-500 mt-1">
+                      Last updated: {lastUpdated}
+                    </p>
+                  )}
+                </div>
+                
+                <div className="flex items-center gap-3">
+                  {/* User Menu */}
+                  {currentUser ? (
+                    <div className="relative">
+                      <button
+                        onClick={() => setUserMenuOpen(!userMenuOpen)}
+                        className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200"
+                      >
+                        <User className="w-5 h-5" />
+                        <span className="hidden md:inline">
+                          {currentUser.name || currentUser.email?.split('@')[0]}
+                        </span>
+                        {getTierBadge(currentUser.subscription_tier)}
+                      </button>
+                      
+                      {userMenuOpen && (
+                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border z-50">
+                          <div className="p-2 border-b">
+                            <p className="text-sm text-gray-600">{currentUser.email}</p>
+                            <p className="text-xs text-gray-500 capitalize">
+                              {currentUser.subscription_tier} Plan
+                            </p>
+                          </div>
+                          <button
+                            onClick={() => {
+                              setShowUserDashboard(true);
+                              setUserMenuOpen(false);
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2"
+                          >
+                            <Settings className="w-4 h-4" />
+                            Dashboard
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowPricingPage(true);
+                              setUserMenuOpen(false);
+                            }}
+                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2"
+                          >
+                            <CreditCard className="w-4 h-4" />
+                            Upgrade Plan
+                          </button>
+                          <button
+                            onClick={handleLogout}
+                            className="w-full text-left px-4 py-2 text-sm hover:bg-gray-50 flex items-center gap-2 text-red-600"
+                          >
+                            <LogOut className="w-4 h-4" />
+                            Sign Out
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setShowPricingPage(true)}
+                      className="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-6 py-2 rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200"
+                    >
+                      Sign Up Free
+                    </button>
+                  )}
+                  
+                  <button
+                    onClick={() => fetchVideos(selectedPlatform)}
+                    disabled={loading}
+                    className="px-6 py-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 disabled:opacity-50 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    {loading ? '🔄 Loading...' : '🔄 Refresh'}
+                  </button>
+                  
+                  <button
+                    onClick={() => setShowSubscriptionModal(true)}
+                    className="px-6 py-3 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl hover:from-green-600 hover:to-teal-600 transition-all duration-200 shadow-lg hover:shadow-xl"
+                  >
+                    🔔 Get Daily Updates
+                  </button>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {/* Main Content */}
+          <main className="container mx-auto px-4 py-8">
+            {/* Platform Filter */}
+            <PlatformFilter 
+              selectedPlatform={selectedPlatform}
+              onPlatformChange={setSelectedPlatform}
+            />
+
+            {/* Upgrade Banner for Free Users */}
+            {currentUser && currentUser.subscription_tier === 'free' && (
+              <div className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white rounded-lg p-4 mb-6">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="font-bold">🚀 Upgrade to Pro for unlimited videos!</h3>
+                    <p className="text-sm opacity-90">Remove ads, get unlimited access, and unlock premium features</p>
+                  </div>
+                  <button
+                    onClick={() => setShowPricingPage(true)}
+                    className="bg-white text-orange-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors"
+                  >
+                    Upgrade Now
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Loading State */}
+            {loading && (
+              <div className="text-center py-12">
+                <div className="inline-block animate-spin rounded-full h-16 w-16 border-4 border-purple-500 border-t-transparent"></div>
+                <p className="mt-4 text-gray-600 text-lg">Loading viral videos...</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mt-8">
+                  {[...Array(8)].map((_, i) => (
+                    <LoadingCard key={i} />
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Error State */}
+            {error && (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">😵</div>
+                <p className="text-red-500 mb-4 text-lg">{error}</p>
+                <button
+                  onClick={() => fetchVideos(selectedPlatform)}
+                  className="px-6 py-3 bg-purple-500 text-white rounded-xl hover:bg-purple-600 transition-all duration-200"
+                >
+                  Try Again
+                </button>
+              </div>
+            )}
+
+            {/* Videos Grid */}
+            {!loading && !error && (
+              <>
+                <div className="text-center mb-8">
+                  <h2 className="text-3xl font-bold text-gray-800 mb-2">
+                    {selectedPlatform === 'all' 
+                      ? `🌟 Top ${videos.length} Viral Videos Today` 
+                      : `📱 Top ${videos.length} ${selectedPlatform.toUpperCase()} Videos`
+                    }
+                  </h2>
+                  <p className="text-gray-600">Updated every hour with the hottest viral content</p>
+                  
+                  {/* Plan-specific messaging */}
+                  {currentUser && (
+                    <p className="text-sm text-purple-600 mt-2">
+                      {currentUser.subscription_tier === 'free' 
+                        ? `Free plan: Showing videos with ads • Upgrade for unlimited access`
+                        : `${currentUser.subscription_tier} plan: Unlimited access • No ads`
+                      }
+                    </p>
+                  )}
+                </div>
+                
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  {videos.map((video, index) => (
+                    <VideoCard key={video.id || index} video={video} />
+                  ))}
+                </div>
+
+                {videos.length === 0 && (
+                  <div className="text-center py-12">
+                    <div className="text-6xl mb-4">🔍</div>
+                    <p className="text-gray-600 text-lg">No viral videos found for the selected platform.</p>
+                    <p className="text-gray-500 mt-2">Try selecting a different platform or refreshing the page.</p>
+                  </div>
+                )}
+              </>
+            )}
+          </main>
+
+          {/* Subscription Modal */}
+          <SubscriptionModal
+            isOpen={showSubscriptionModal}
+            onClose={() => setShowSubscriptionModal(false)}
+            onSubscribe={handleSubscribe}
+          />
+
+          {/* Footer */}
+          <footer className="bg-gradient-to-r from-gray-800 to-gray-900 text-white py-12 mt-16">
+            <div className="container mx-auto px-4 text-center">
+              <h3 className="text-2xl font-bold mb-2">🔥 Viral Daily</h3>
+              <p className="text-gray-300 mb-4">Your daily dose of viral content</p>
+              <p className="text-sm text-gray-400 mb-6">
+                Aggregating the best viral videos from YouTube, TikTok, Twitter, and Instagram
+              </p>
+              <div className="flex justify-center space-x-6 mb-6">
+                <span className="text-gray-400">📺 YouTube</span>
+                <span className="text-gray-400">🎵 TikTok</span>
+                <span className="text-gray-400">🐦 Twitter</span>
+                <span className="text-gray-400">📷 Instagram</span>
+              </div>
+              <div className="border-t border-gray-700 pt-6">
+                <p className="text-xs text-gray-500">
+                  © 2025 Viral Daily. All rights reserved. • 
+                  <button
+                    onClick={() => setShowPricingPage(true)}
+                    className="text-purple-400 hover:text-purple-300 ml-1"
+                  >
+                    Pricing
+                  </button>
+                </p>
+              </div>
+            </div>
+          </footer>
+        </>
+      )}
     </div>
   );
 }
