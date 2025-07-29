@@ -293,11 +293,12 @@ class VideoAggregator:
             "Can we normalize this please? 🙏"
         ]
         
+        # Use data URIs for TikTok thumbnails to avoid external dependencies
         for i in range(limit):
             video = ViralVideo(
                 title=tiktok_titles[i % len(tiktok_titles)],
                 url=f"https://www.tiktok.com/@viraluser{i+1}/video/7{i+1:012d}",
-                thumbnail=f"https://via.placeholder.com/300x400/FF0050/FFFFFF?text=TikTok+{i+1}",
+                thumbnail="", # Will trigger fallback to SVG placeholder
                 platform=Platform.TIKTOK,
                 views=5000000 + i * 200000,
                 likes=250000 + i * 10000,
@@ -366,7 +367,7 @@ class VideoAggregator:
                     video = ViralVideo(
                         title=tweet.text[:100] + "..." if len(tweet.text) > 100 else tweet.text,
                         url=f"https://twitter.com/i/status/{tweet.id}",
-                        thumbnail=f"https://via.placeholder.com/400x225/1DA1F2/FFFFFF?text=Twitter+Video",
+                        thumbnail="", # Will trigger fallback to SVG placeholder
                         platform=Platform.TWITTER,
                         views=metrics.get('impression_count', 0),
                         likes=likes,
@@ -410,7 +411,7 @@ class VideoAggregator:
             video = ViralVideo(
                 title=twitter_titles[i % len(twitter_titles)],
                 url=f"https://twitter.com/viraltweets/status/17{i+1:014d}",
-                thumbnail=f"https://via.placeholder.com/400x225/1DA1F2/FFFFFF?text=Twitter+{i+1}",
+                thumbnail="", # Will trigger fallback to SVG placeholder
                 platform=Platform.TWITTER,
                 views=2000000 + i * 150000,
                 likes=100000 + i * 8000,
@@ -443,7 +444,7 @@ class VideoAggregator:
             video = ViralVideo(
                 title=instagram_titles[i % len(instagram_titles)],
                 url=f"https://www.instagram.com/reel/C{i+1:010d}/",
-                thumbnail=f"https://via.placeholder.com/300x300/E4405F/FFFFFF?text=IG+{i+1}",
+                thumbnail="", # Will trigger fallback to SVG placeholder
                 platform=Platform.INSTAGRAM,
                 views=3000000 + i * 180000,
                 likes=180000 + i * 9000,
