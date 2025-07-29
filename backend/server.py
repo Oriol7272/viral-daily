@@ -50,6 +50,7 @@ app = FastAPI(title="Viral Daily API", description="Monetized API for aggregatin
 # Create routers
 api_router = APIRouter(prefix="/api")
 payments_router = create_payment_router(db, auth_service)
+paypal_router = create_paypal_router(db)
 admin_router = APIRouter(prefix="/api/admin")
 
 # Video Aggregation Service (Enhanced)
