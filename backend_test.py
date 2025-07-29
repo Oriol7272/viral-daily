@@ -294,8 +294,10 @@ class ViralDailyAPITester:
             else:
                 print(f"   ✅ PayPal Available: {response['available']}")
                 print(f"   Mode: {response['mode']}")
-                if not response['available']:
-                    print("   ℹ️  PayPal not available due to missing credentials (expected)")
+                if response['available']:
+                    print("   🎉 PayPal is now available with real credentials!")
+                else:
+                    print("   ⚠️  PayPal not available - credentials may be missing")
                 return True
         return False
 
