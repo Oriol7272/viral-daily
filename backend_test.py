@@ -391,9 +391,9 @@ class ViralDailyAPITester:
         return False
 
     def run_all_tests(self):
-        """Run all API tests including monetization features"""
-        print("🚀 Starting Viral Daily MONETIZED API Tests")
-        print("=" * 60)
+        """Run all API tests including monetization and PayPal features"""
+        print("🚀 Starting Viral Daily MONETIZED API Tests with PayPal Integration")
+        print("=" * 70)
         
         # Test core endpoints first
         core_tests = [
@@ -410,7 +410,17 @@ class ViralDailyAPITester:
             ("Subscription Info", self.test_subscription_info),
         ]
         
-        all_tests = core_tests + monetization_tests
+        # Test PayPal integration
+        paypal_tests = [
+            ("PayPal Configuration", self.test_paypal_config),
+            ("PayPal Availability", self.test_paypal_availability),
+            ("PayPal Create Order (Unauthenticated)", self.test_paypal_create_order_unauthenticated),
+            ("PayPal Create Order (Authenticated)", self.test_paypal_create_order_authenticated),
+            ("PayPal Order Status", self.test_paypal_order_status),
+            ("PayPal Webhook Handler", self.test_paypal_webhook),
+        ]
+        
+        all_tests = core_tests + monetization_tests + paypal_tests
         
         for test_name, test_func in all_tests:
             print(f"\n📋 Running {test_name} Tests...")
