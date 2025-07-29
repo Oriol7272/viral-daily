@@ -374,7 +374,7 @@ class ViralDailyAPITester:
                 # Check for EUR currency in approval URL or response
                 approval_url = response.get('approval_url', '')
                 if approval_url and "paypal.com" in approval_url and "sandbox" not in approval_url:
-                    print("   ✅ Live PayPal URL confirmed - business account active")
+                    print("   ✅ Live PayPal URL confirmed - NEW credentials active")
                 
                 return True
             return False
