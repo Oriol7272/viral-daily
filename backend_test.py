@@ -61,7 +61,7 @@ class ViralDailyAPITester:
         return False
 
     def test_get_all_videos(self):
-        """Test GET /api/videos - Get all viral videos"""
+        """Test GET /api/videos - Get all viral videos with enhanced features"""
         success, response = self.run_test(
             "Get All Videos",
             "GET",
@@ -90,7 +90,116 @@ class ViralDailyAPITester:
                 is_sorted = all(viral_scores[i] >= viral_scores[i+1] for i in range(len(viral_scores)-1))
                 print(f"   Viral score sorting: {'✅ Correct' if is_sorted else '❌ Incorrect'}")
                 
+                # Enhanced features testing
+                self.test_enhanced_features(videos)
+                
             return len(videos) > 0
+        return False
+
+    def test_enhanced_features(self, videos):
+        """Test enhanced features in video data"""
+        print(f"\n   🔍 Testing Enhanced Features:")
+        
+        # Test viral score quality
+        viral_scores = [v.get('viral_score', 0) for v in videos]
+        score_range = f"{min(viral_scores):.1f}-{max(viral_scores):.1f}"
+        valid_scores = all(0 <= score <= 100 for score in viral_scores)
+        print(f"   Viral scores range: {score_range} ({'✅ Valid' if valid_scores else '❌ Invalid'})")
+        
+        # Test title quality (enhanced titles should be longer and more engaging)
+        avg_title_length = sum(len(v.get('title', '')) for v in videos) / len(videos)
+        engaging_titles = sum(1 for v in videos if any(word in v.get('title', '').lower() 
+                                                     for word in ['viral', 'trending', 'pov', 'breaking', 'amazing', 'incredible']))
+        print(f"   Average title length: {avg_title_length:.1f} chars")
+        print(f"   Engaging titles: {engaging_titles}/{len(videos)} ({'✅ Good' if engaging_titles > len(videos)//4 else '⚠️ Could improve'})")
+        
+        # Test platform diversity
+        platforms = set(v.get('platform') for v in videos)
+        print(f"   Platform diversity: {len(platforms)} platforms ({'✅ Good' if len(platforms) >= 3 else '⚠️ Limited'})")
+        
+        # Test data completeness
+        complete_videos = sum(1 for v in videos if all(v.get(field) for field in ['views', 'likes', 'author']))
+        completeness_rate = (complete_videos / len(videos)) * 100
+        print(f"   Data completeness: {completeness_rate:.1f}% ({'✅ Good' if completeness_rate > 80 else '⚠️ Could improve'})")
+
+    def test_viral_scoring_algorithm(self):
+        """Test the enhanced viral scoring algorithm"""
+        print(f"\n🔍 Testing Enhanced Viral Scoring Algorithm...")
+        
+        # Test with different platforms to see scoring differences
+        platforms = ['youtube', 'twitter', 'tiktok', 'instagram']
+        platform_scores = {}
+        
+        for platform in platforms:
+            success, response = self.run_test(
+                f"Viral Scoring - {platform.upper()}",
+                "GET",
+                "videos",
+                200,
+                params={'platform': platform, 'limit': 5}
+            )
+            
+            if success and isinstance(response, dict):
+                videos = response.get('videos', [])
+                if videos:
+                    scores = [v.get('viral_score', 0) for v in videos]
+                    platform_scores[platform] = {
+                        'avg_score': sum(scores) / len(scores),
+                        'max_score': max(scores),
+                        'min_score': min(scores)
+                    }
+                    print(f"   {platform.upper()}: Avg={platform_scores[platform]['avg_score']:.1f}, Range={platform_scores[platform]['min_score']:.1f}-{platform_scores[platform]['max_score']:.1f}")
+        
+        # Verify scoring makes sense
+        if platform_scores:
+            all_scores = [data['avg_score'] for data in platform_scores.values()]
+            score_variance = max(all_scores) - min(all_scores)
+            print(f"   Score variance across platforms: {score_variance:.1f} ({'✅ Good diversity' if score_variance > 10 else '⚠️ Low diversity'})")
+
+    def test_api_resilience(self):
+        """Test API resilience and error handling"""
+        print(f"\n🔍 Testing API Resilience...")
+        
+        # Test invalid platform
+        success, response = self.run_test(
+            "Invalid Platform Handling",
+            "GET",
+            "videos",
+            200,  # Should handle gracefully, not error
+            params={'platform': 'invalid_platform'}
+        )
+        
+        # Test large limit
+        success, response = self.run_test(
+            "Large Limit Handling",
+            "GET",
+            "videos",
+            200,
+            params={'limit': 1000}
+        )
+        
+        # Test negative limit
+        success, response = self.run_test(
+            "Negative Limit Handling",
+            "GET",
+            "videos",
+            200,  # Should handle gracefully
+            params={'limit': -1}
+        )
+
+    def test_daily_delivery(self):
+        """Test daily delivery endpoint"""
+        success, response = self.run_test(
+            "Daily Delivery Trigger",
+            "POST",
+            "deliver-daily",
+            200
+        )
+        
+        if success and isinstance(response, dict):
+            message = response.get('message', '')
+            print(f"   Delivery message: {message}")
+            return 'scheduled' in message.lower()
         return False
 
     def test_platform_filtering(self):
