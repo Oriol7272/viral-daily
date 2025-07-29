@@ -217,8 +217,11 @@ class VideoAggregator:
             logging.error(f"YouTube API error: {e}")
             if "quotaExceeded" in str(e):
                 logging.warning("YouTube API quota exceeded, returning mock data")
-                return await self._get_youtube_mock_data(limit)
-            raise HTTPException(status_code=400, detail=f"YouTube API error: {str(e)}")
+            elif "keyInvalid" in str(e) or "API key not valid" in str(e):
+                logging.warning("YouTube API key invalid, returning mock data")
+            else:
+                logging.warning(f"YouTube API error: {str(e)}, returning mock data")
+            return await self._get_youtube_mock_data(limit)
         except Exception as e:
             logging.error(f"Unexpected error fetching YouTube videos: {e}")
             return await self._get_youtube_mock_data(limit)
