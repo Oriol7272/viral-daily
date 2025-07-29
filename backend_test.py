@@ -360,7 +360,7 @@ class ViralDailyAPITester:
         if avail_success and avail_response.get('available'):
             # PayPal is available, should work without auth for order creation
             success, response = self.run_test(
-                "PayPal Create Order (Unauthenticated - Business Account)",
+                "PayPal Create Order (Unauthenticated - NEW Live Credentials)",
                 "POST",
                 "payments/paypal/create-order",
                 200,  # Should succeed even without auth
