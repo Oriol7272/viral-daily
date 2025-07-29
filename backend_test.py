@@ -253,9 +253,9 @@ class ViralDailyAPITester:
         return False
 
     def test_paypal_config(self):
-        """Test GET /api/payments/paypal/config - PayPal configuration with business account"""
+        """Test GET /api/payments/paypal/config - PayPal configuration with NEW live credentials"""
         success, response = self.run_test(
-            "PayPal Configuration (Business Account)",
+            "PayPal Configuration (NEW Live Credentials)",
             "GET",
             "payments/paypal/config",
             200
