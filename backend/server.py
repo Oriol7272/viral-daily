@@ -22,6 +22,7 @@ from auth import AuthService, get_current_user, require_user, require_pro_user, 
 from subscription_plans import SUBSCRIPTION_PLANS, get_plan, get_stripe_price_id
 from advertising import AdvertisingService
 from analytics import AnalyticsService
+from payments import create_payment_router
 
 # Stripe integration
 from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionResponse, CheckoutStatusResponse, CheckoutSessionRequest
