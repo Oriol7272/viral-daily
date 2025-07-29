@@ -74,18 +74,43 @@ const VideoCard = ({ video }) => {
   };
 
   const getReliableThumbnail = () => {
-    if (imageError || !video.thumbnail) {
-      // Use a simple placeholder service instead of btoa
+    if (imageError || !video.thumbnail || video.thumbnail.includes('via.placeholder.com') || video.thumbnail.includes('mock')) {
+      // Create inline SVG data URI for reliable thumbnails
       const colors = {
-        youtube: 'FF0000',
-        tiktok: '000000',
-        twitter: '1DA1F2',
-        instagram: 'E4405F'
+        youtube: '#FF0000',
+        tiktok: '#000000', 
+        twitter: '#1DA1F2',
+        instagram: '#E4405F'
       };
-      const bgColor = colors[video.platform] || '6B7280';
-      const platformText = video.platform.toUpperCase();
+      const bgColor = colors[video.platform] || '#6B7280';
+      const platformIcons = {
+        youtube: '📺',
+        tiktok: '🎵',
+        twitter: '🐦',
+        instagram: '📷'
+      };
+      const icon = platformIcons[video.platform] || '🎬';
+      const platformName = video.platform.toUpperCase();
+      const score = video.viral_score ? Math.round(video.viral_score) : 'N/A';
       
-      return `https://via.placeholder.com/400x225/${bgColor}/FFFFFF?text=${platformText}+VIDEO`;
+      // Create clean SVG without special characters
+      const svgContent = `<svg width="400" height="225" xmlns="http://www.w3.org/2000/svg">
+        <rect width="400" height="225" fill="${bgColor}"/>
+        <rect x="0" y="0" width="400" height="225" fill="url(#grad1)" opacity="0.1"/>
+        <defs>
+          <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:white;stop-opacity:0.2" />
+            <stop offset="100%" style="stop-color:white;stop-opacity:0" />
+          </linearGradient>
+        </defs>
+        <text x="200" y="90" text-anchor="middle" fill="white" font-size="36" font-weight="bold">${icon}</text>
+        <text x="200" y="130" text-anchor="middle" fill="white" font-size="18" font-weight="bold">${platformName}</text>
+        <text x="200" y="155" text-anchor="middle" fill="white" font-size="14">Viral Score: ${score}</text>
+        <text x="200" y="180" text-anchor="middle" fill="white" font-size="12" opacity="0.8">VIRAL DAILY</text>
+      </svg>`;
+      
+      // Convert to data URI safely
+      return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgContent)}`;
     }
     return video.thumbnail;
   };
