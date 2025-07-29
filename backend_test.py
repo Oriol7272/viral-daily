@@ -430,7 +430,7 @@ class ViralDailyAPITester:
                     print(f"   ❌ Missing fields: {missing_fields}")
                     return False
                 else:
-                    print(f"   🎉 PayPal Order Created Successfully with Business Account!")
+                    print(f"   🎉 PayPal Order Created Successfully with NEW Live Credentials!")
                     print(f"   Order ID: {response['order_id']}")
                     print(f"   Status: {response['order_status']}")
                     
@@ -440,7 +440,7 @@ class ViralDailyAPITester:
                         
                         # Check if URL contains live PayPal domain (not sandbox)
                         if "paypal.com" in approval_url and "sandbox" not in approval_url:
-                            print("   ✅ Live PayPal URL detected - business account working!")
+                            print("   ✅ Live PayPal URL detected - NEW credentials working!")
                         elif "sandbox.paypal.com" in approval_url:
                             print("   ⚠️  Sandbox URL detected - should be live mode")
                         else:
@@ -448,7 +448,7 @@ class ViralDailyAPITester:
                     
                     # Verify the order was created in EUR currency by checking the database
                     # This would be done by the PayPal service internally
-                    print("   💰 Order should be created in EUR currency as per business account config")
+                    print("   💰 Order should be created in EUR currency as per NEW live account config")
                     
                     return True
             return False
