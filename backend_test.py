@@ -298,9 +298,9 @@ class ViralDailyAPITester:
                 # Overall success
                 all_correct = mode_correct and currency_correct and client_id_correct
                 if all_correct:
-                    print("   🎉 PayPal business account configuration is PERFECT!")
+                    print("   🎉 PayPal NEW live account configuration is PERFECT!")
                 else:
-                    print("   ⚠️  PayPal business account configuration has issues")
+                    print("   ⚠️  PayPal NEW live account configuration has issues")
                 
                 return all_correct
         return False
