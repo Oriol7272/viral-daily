@@ -587,6 +587,46 @@ class ViralDailyAPITester:
             print("   ❌ Failed to get PayPal configuration")
             return False
 
+    def test_paypal_error_handling(self):
+        """Test PayPal endpoints with invalid data for error handling"""
+        print("\n🔍 Testing PayPal Error Handling...")
+        
+        # Test create order with invalid subscription tier
+        invalid_order_data = {
+            "subscription_tier": "invalid_tier",
+            "billing_cycle": "monthly"
+        }
+        
+        success, response = self.run_test(
+            "PayPal Create Order (Invalid Tier)",
+            "POST",
+            "payments/paypal/create-order",
+            422,  # Validation error expected
+            data=invalid_order_data
+        )
+        
+        if success:
+            print("   ✅ Properly handles invalid subscription tier")
+        
+        # Test create order with missing required fields
+        incomplete_order_data = {
+            "subscription_tier": "pro"
+            # Missing billing_cycle
+        }
+        
+        success2, response2 = self.run_test(
+            "PayPal Create Order (Missing Fields)",
+            "POST",
+            "payments/paypal/create-order",
+            422,  # Validation error expected
+            data=incomplete_order_data
+        )
+        
+        if success2:
+            print("   ✅ Properly handles missing required fields")
+        
+        return success and success2
+
     def run_all_tests(self):
         """Run all API tests including monetization and PayPal features"""
         print("🚀 Starting Viral Daily MONETIZED API Tests with PayPal Business Account Integration")
