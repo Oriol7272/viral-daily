@@ -2,7 +2,7 @@
 
 from typing import List, Optional
 from motor.motor_asyncio import AsyncIOMotorDatabase
-from models import Advertisement, AdImpression, AdClick, Platform, User, SubscriptionTier
+from models import Advertisement, AdImpression, AdClick, Platform, User, SubscriptionTier, ViralVideo
 import random
 from datetime import datetime
 import logging
