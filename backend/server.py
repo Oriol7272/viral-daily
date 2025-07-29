@@ -231,15 +231,43 @@ class VideoAggregator:
     async def _get_youtube_mock_data(self, limit: int) -> List[ViralVideo]:
         """Fallback mock data for YouTube"""
         videos = []
+        
+        # Use real YouTube thumbnail URLs from popular videos
+        real_thumbnails = [
+            "https://i.ytimg.com/vi/dQw4w9WgXcQ/maxresdefault.jpg",  # Never Gonna Give You Up
+            "https://i.ytimg.com/vi/9bZkp7q19f0/maxresdefault.jpg",  # Gangnam Style
+            "https://i.ytimg.com/vi/kJQP7kiw5Fk/maxresdefault.jpg",  # Despacito
+            "https://i.ytimg.com/vi/fJ9rUzIMcZQ/maxresdefault.jpg",  # Shape of You
+            "https://i.ytimg.com/vi/YQHsXMglC9A/maxresdefault.jpg",  # Hello - Adele
+            "https://i.ytimg.com/vi/CevxZvSJLk8/maxresdefault.jpg",  # Roar - Katy Perry
+            "https://i.ytimg.com/vi/RgKAFK5djSk/maxresdefault.jpg",  # Wrecking Ball
+            "https://i.ytimg.com/vi/hT_nvWreIhg/maxresdefault.jpg",  # Counting Stars
+            "https://i.ytimg.com/vi/iGk5fR-t5AU/maxresdefault.jpg",  # Firework
+            "https://i.ytimg.com/vi/nfWlot6h_JM/maxresdefault.jpg"   # Shake It Off
+        ]
+        
+        youtube_titles = [
+            "This Video Will Change Your Perspective Forever 🤯",
+            "The Most Satisfying Video You'll Ever Watch",
+            "Everyone's Talking About This Viral Dance Challenge",
+            "This Trick Will Blow Your Mind! (Not Clickbait)",
+            "Why This Song is Breaking the Internet",
+            "The Funniest Video That's Taking Over YouTube",
+            "This Life Hack Changed Everything For Me",
+            "The Most Wholesome Video on the Internet Right Now",
+            "This Performance Gave Me Chills - Pure Talent!",
+            "Watch This Before It Gets Taken Down!"
+        ]
+        
         for i in range(limit):
             video = ViralVideo(
-                title=f"YouTube Viral Video {i+1}",
-                url=f"https://www.youtube.com/watch?v=mock{i+1}",
-                thumbnail=f"https://img.youtube.com/vi/mock{i+1}/maxresdefault.jpg",
+                title=youtube_titles[i % len(youtube_titles)],
+                url=f"https://www.youtube.com/watch?v=viral{i+1:03d}",
+                thumbnail=real_thumbnails[i % len(real_thumbnails)],
                 platform=Platform.YOUTUBE,
                 views=1000000 + i * 100000,
                 likes=50000 + i * 5000,
-                author=f"Creator {i+1}",
+                author=f"ViralCreator{i+1}",
                 duration=f"{2+i}:{30+i:02d}",
                 viral_score=90.0 - i * 2,
                 published_at=datetime.utcnow() - timedelta(hours=i)
