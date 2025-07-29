@@ -572,7 +572,7 @@ class ViralDailyAPITester:
                     
                     if order_success:
                         print("   ✅ Order created successfully - EUR currency should be applied internally")
-                        print("   💰 Business account configured for EUR transactions")
+                        print("   💰 NEW live account configured for EUR transactions")
                         return True
                     else:
                         print("   ⚠️  Order creation failed, but EUR config is correct")
