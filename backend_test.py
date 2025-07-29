@@ -647,9 +647,9 @@ class ViralDailyAPITester:
             ("Subscription Info", self.test_subscription_info),
         ]
         
-        # Test PayPal integration with business account focus
+        # Test PayPal integration with NEW live credentials focus
         paypal_tests = [
-            ("PayPal Configuration (Business Account)", self.test_paypal_config),
+            ("PayPal Configuration (NEW Live Credentials)", self.test_paypal_config),
             ("PayPal Availability (Live Mode)", self.test_paypal_availability),
             ("PayPal EUR Currency Validation", self.test_paypal_eur_currency_validation),
             ("PayPal Create Order (Unauthenticated)", self.test_paypal_create_order_unauthenticated),
