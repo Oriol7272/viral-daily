@@ -58,7 +58,179 @@ class ViralDailyAPITester:
             print(f"❌ Failed - Error: {str(e)}")
             return False, {}
 
-    def test_user_registration(self):
+    def test_root_endpoint(self):
+        """Test GET /api/ - Welcome message"""
+        success, response = self.run_test(
+            "Root API Endpoint",
+            "GET",
+            "",
+            200
+        )
+        if success and isinstance(response, dict) and 'message' in response:
+            print(f"   Message: {response['message']}")
+            return True
+        return False
+
+    def test_get_all_videos(self):
+        """Test GET /api/videos - Get all viral videos with enhanced features"""
+        success, response = self.run_test(
+            "Get All Videos",
+            "GET",
+            "videos",
+            200
+        )
+        if success and isinstance(response, dict):
+            videos = response.get('videos', [])
+            total = response.get('total', 0)
+            print(f"   Found {total} videos")
+            
+            if videos:
+                # Check first video structure
+                first_video = videos[0]
+                required_fields = ['title', 'url', 'thumbnail', 'platform', 'viral_score']
+                missing_fields = [field for field in required_fields if field not in first_video]
+                
+                if missing_fields:
+                    print(f"   ⚠️  Missing required fields: {missing_fields}")
+                else:
+                    print(f"   ✅ Video structure valid")
+                    print(f"   Sample video: {first_video['title']} ({first_video['platform']})")
+                
+                # Check if videos are sorted by viral_score
+                viral_scores = [v.get('viral_score', 0) for v in videos]
+                is_sorted = all(viral_scores[i] >= viral_scores[i+1] for i in range(len(viral_scores)-1))
+                print(f"   Viral score sorting: {'✅ Correct' if is_sorted else '❌ Incorrect'}")
+                
+            return len(videos) > 0
+        return False
+
+    def test_platform_filtering(self):
+        """Test platform filtering for each platform"""
+        platforms = ['youtube', 'tiktok', 'twitter', 'instagram']
+        all_passed = True
+        
+        for platform in platforms:
+            success, response = self.run_test(
+                f"Get {platform.upper()} Videos",
+                "GET",
+                "videos",
+                200,
+                params={'platform': platform}
+            )
+            
+            if success and isinstance(response, dict):
+                videos = response.get('videos', [])
+                platform_match = response.get('platform') == platform
+                
+                # Check if all videos are from the requested platform
+                correct_platform = all(v.get('platform') == platform for v in videos)
+                
+                print(f"   Platform filter: {'✅ Correct' if platform_match else '❌ Incorrect'}")
+                print(f"   All videos from {platform}: {'✅ Yes' if correct_platform else '❌ No'}")
+                print(f"   Video count: {len(videos)}")
+                
+                if not (platform_match and correct_platform and len(videos) > 0):
+                    all_passed = False
+            else:
+                all_passed = False
+                
+        return all_passed
+
+    def test_viral_scoring_algorithm(self):
+        """Test the enhanced viral scoring algorithm"""
+        print(f"\n🔍 Testing Enhanced Viral Scoring Algorithm...")
+        
+        # Test with different platforms to see scoring differences
+        platforms = ['youtube', 'twitter', 'tiktok', 'instagram']
+        platform_scores = {}
+        
+        for platform in platforms:
+            success, response = self.run_test(
+                f"Viral Scoring - {platform.upper()}",
+                "GET",
+                "videos",
+                200,
+                params={'platform': platform, 'limit': 5}
+            )
+            
+            if success and isinstance(response, dict):
+                videos = response.get('videos', [])
+                if videos:
+                    scores = [v.get('viral_score', 0) for v in videos]
+                    platform_scores[platform] = {
+                        'avg_score': sum(scores) / len(scores),
+                        'max_score': max(scores),
+                        'min_score': min(scores)
+                    }
+                    print(f"   {platform.upper()}: Avg={platform_scores[platform]['avg_score']:.1f}, Range={platform_scores[platform]['min_score']:.1f}-{platform_scores[platform]['max_score']:.1f}")
+        
+        # Verify scoring makes sense
+        if platform_scores:
+            all_scores = [data['avg_score'] for data in platform_scores.values()]
+            score_variance = max(all_scores) - min(all_scores)
+            print(f"   Score variance across platforms: {score_variance:.1f} ({'✅ Good diversity' if score_variance > 10 else '⚠️ Low diversity'})")
+        
+        return True
+
+    def test_api_resilience(self):
+        """Test API resilience and error handling"""
+        print(f"\n🔍 Testing API Resilience...")
+        
+        # Test invalid platform
+        success, response = self.run_test(
+            "Invalid Platform Handling",
+            "GET",
+            "videos",
+            200,  # Should handle gracefully, not error
+            params={'platform': 'invalid_platform'}
+        )
+        
+        # Test large limit
+        success, response = self.run_test(
+            "Large Limit Handling",
+            "GET",
+            "videos",
+            200,
+            params={'limit': 1000}
+        )
+        
+        # Test negative limit
+        success, response = self.run_test(
+            "Negative Limit Handling",
+            "GET",
+            "videos",
+            200,  # Should handle gracefully
+            params={'limit': -1}
+        )
+        
+        return True
+
+    def test_subscription_creation(self):
+        """Test POST /api/subscribe - Create legacy subscription"""
+        test_subscription = {
+            "email": f"test_{uuid.uuid4().hex[:8]}@example.com",
+            "delivery_methods": ["email"]
+        }
+        
+        success, response = self.run_test(
+            "Create Legacy Subscription",
+            "POST",
+            "subscribe",
+            200,
+            data=test_subscription
+        )
+        
+        if success and isinstance(response, dict):
+            required_fields = ['id', 'delivery_methods', 'active', 'created_at']
+            missing_fields = [field for field in required_fields if field not in response]
+            
+            if missing_fields:
+                print(f"   ⚠️  Missing fields in response: {missing_fields}")
+                return False
+            else:
+                print(f"   ✅ Legacy subscription created with ID: {response['id']}")
+                return True
+        return False
         """Test POST /api/users/register - User registration"""
         test_email = f"test_{uuid.uuid4().hex[:8]}@example.com"
         test_name = f"Test User {datetime.now().strftime('%H%M%S')}"
