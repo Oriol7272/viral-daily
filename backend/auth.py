@@ -148,8 +148,7 @@ class AuthService:
 # Dependency functions for FastAPI
 async def get_current_user(
     authorization: Optional[str] = Header(None),
-    x_api_key: Optional[str] = Header(None),
-    db = None
+    x_api_key: Optional[str] = Header(None)
 ) -> Optional[User]:
     """Get current user from API key (optional)"""
     api_key = None
@@ -165,16 +164,16 @@ async def get_current_user(
     if not api_key:
         return None
     
-    auth_service = AuthService(db)
+    # Import here to avoid circular imports
+    from server import db, auth_service
     return await auth_service.get_user_by_api_key(api_key)
 
 async def require_user(
     authorization: Optional[str] = Header(None),
-    x_api_key: Optional[str] = Header(None),
-    db = None
+    x_api_key: Optional[str] = Header(None)
 ) -> User:
     """Require authenticated user"""
-    user = await get_current_user(authorization, x_api_key, db)
+    user = await get_current_user(authorization, x_api_key)
     if not user:
         raise HTTPException(
             status_code=401,
