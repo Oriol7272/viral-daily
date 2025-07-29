@@ -234,22 +234,23 @@ class AdvertisingService:
             # Insert ad every 6-8 videos (with some randomness)
             if (i + 1) % random.randint(6, 8) == 0 and ad_index < len(ads):
                 ad = ads[ad_index]
-                ad_video = {
-                    "id": f"ad_{ad.id}",
-                    "title": f"🎯 {ad.title}",
-                    "url": ad.click_url,
-                    "thumbnail": ad.image_url,
-                    "platform": "advertisement",
-                    "views": None,
-                    "likes": None,
-                    "author": ad.advertiser,
-                    "description": ad.description,
-                    "viral_score": 0,
-                    "is_sponsored": True,
-                    "sponsor_name": ad.advertiser,
-                    "fetched_at": datetime.utcnow(),
-                    "published_at": datetime.utcnow()
-                }
+                # Create ViralVideo object for ads instead of dict
+                ad_video = ViralVideo(
+                    id=f"ad_{ad.id}",
+                    title=f"🎯 {ad.title}",
+                    url=ad.click_url,
+                    thumbnail=ad.image_url,
+                    platform="advertisement",
+                    views=None,
+                    likes=None,
+                    author=ad.advertiser,
+                    description=ad.description,
+                    viral_score=0,
+                    is_sponsored=True,
+                    sponsor_name=ad.advertiser,
+                    fetched_at=datetime.utcnow(),
+                    published_at=datetime.utcnow()
+                )
                 result.append(ad_video)
                 ad_index += 1
         
