@@ -1,30 +1,20 @@
-from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks, Depends, Request, Header
-from fastapi.responses import RedirectResponse
+from fastapi import FastAPI, APIRouter, HTTPException, BackgroundTasks
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
 from pathlib import Path
+from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional, Dict, Any
 import uuid
 from datetime import datetime, timedelta
 import aiohttp
 import asyncio
+from enum import Enum
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
 import re
-import time
-
-# Import monetization modules
-from models import *
-from auth import AuthService, get_current_user, require_user, require_pro_user, require_business_user
-from subscription_plans import SUBSCRIPTION_PLANS, get_plan, get_stripe_price_id
-from advertising import AdvertisingService
-from analytics import AnalyticsService
-
-# Stripe integration
-from emergentintegrations.payments.stripe.checkout import StripeCheckout, CheckoutSessionResponse, CheckoutStatusResponse, CheckoutSessionRequest
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
@@ -34,23 +24,64 @@ mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# Initialize services
-auth_service = AuthService(db)
-advertising_service = AdvertisingService(db)
-analytics_service = AnalyticsService(db)
+# Create the main app without a prefix
+app = FastAPI(title="Viral Daily API", description="API for aggregating viral videos from multiple platforms")
 
-# Stripe setup
-stripe_api_key = os.environ.get('STRIPE_API_KEY')
-
-# Create the main app
-app = FastAPI(title="Viral Daily API", description="Monetized API for aggregating viral videos from multiple platforms")
-
-# Create routers
+# Create a router with the /api prefix
 api_router = APIRouter(prefix="/api")
-payments_router = APIRouter(prefix="/api/payments/v1")
-admin_router = APIRouter(prefix="/api/admin")
 
-# Video Aggregation Service (Enhanced)
+# Enums
+class Platform(str, Enum):
+    YOUTUBE = "youtube"
+    TIKTOK = "tiktok"
+    TWITTER = "twitter"
+    INSTAGRAM = "instagram"
+
+class DeliveryMethod(str, Enum):
+    EMAIL = "email"
+    TELEGRAM = "telegram"
+    WHATSAPP = "whatsapp"
+
+# Data Models
+class ViralVideo(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    title: str
+    url: str
+    thumbnail: str
+    platform: Platform
+    views: Optional[int] = None
+    likes: Optional[int] = None
+    shares: Optional[int] = None
+    author: Optional[str] = None
+    duration: Optional[str] = None
+    description: Optional[str] = None
+    viral_score: float = 0.0  # Custom scoring algorithm
+    fetched_at: datetime = Field(default_factory=datetime.utcnow)
+    published_at: Optional[datetime] = None
+
+class VideoResponse(BaseModel):
+    videos: List[ViralVideo]
+    total: int
+    platform: Optional[Platform] = None
+    date: datetime
+
+class Subscription(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    email: Optional[EmailStr] = None
+    telegram_id: Optional[str] = None
+    whatsapp_number: Optional[str] = None
+    delivery_methods: List[DeliveryMethod]
+    active: bool = True
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    last_delivery: Optional[datetime] = None
+
+class SubscriptionCreate(BaseModel):
+    email: Optional[EmailStr] = None
+    telegram_id: Optional[str] = None
+    whatsapp_number: Optional[str] = None
+    delivery_methods: List[DeliveryMethod]
+
+# Video Aggregation Service
 class VideoAggregator:
     def __init__(self):
         self.youtube_api_key = os.getenv('YOUTUBE_API_KEY')
@@ -280,38 +311,6 @@ class VideoAggregator:
             
         return videos
 
-    async def _get_twitter_mock_data(self, limit: int) -> List[ViralVideo]:
-        """Enhanced mock data for Twitter"""
-        twitter_titles = [
-            "This video has me CRYING 😂😂😂",
-            "Twitter do your thing and make this viral",
-            "The internet is undefeated with these memes",
-            "POV: You open Twitter and see this",
-            "This tweet aged like fine wine",
-            "The way Twitter came together for this...",
-            "Breaking: This video broke the internet",
-            "When Twitter users unite for something wholesome",
-            "This thread explains everything perfectly",
-            "Twitter main character of the day:"
-        ]
-        
-        videos = []
-        for i in range(limit):
-            video = ViralVideo(
-                title=twitter_titles[i % len(twitter_titles)],
-                url=f"https://twitter.com/viraltweets/status/17{i+1:014d}",
-                thumbnail="", # Will trigger fallback to SVG placeholder
-                platform=Platform.TWITTER,
-                views=2000000 + i * 150000,
-                likes=100000 + i * 8000,
-                shares=25000 + i * 2000,
-                author=f"@twitteruser{i+1}",
-                viral_score=80.0 - i * 1.8,
-                published_at=datetime.utcnow() - timedelta(hours=i * 3)
-            )
-            videos.append(video)
-        return videos
-
     async def fetch_twitter_viral_videos(self, limit: int = 10) -> List[ViralVideo]:
         """Fetch viral videos from Twitter/X using API v2"""
         videos = []
@@ -392,6 +391,38 @@ class VideoAggregator:
         videos.sort(key=lambda x: x.viral_score, reverse=True)
         return videos
 
+    async def _get_twitter_mock_data(self, limit: int) -> List[ViralVideo]:
+        """Enhanced mock data for Twitter"""
+        twitter_titles = [
+            "This video has me CRYING 😂😂😂",
+            "Twitter do your thing and make this viral",
+            "The internet is undefeated with these memes",
+            "POV: You open Twitter and see this",
+            "This tweet aged like fine wine",
+            "The way Twitter came together for this...",
+            "Breaking: This video broke the internet",
+            "When Twitter users unite for something wholesome",
+            "This thread explains everything perfectly",
+            "Twitter main character of the day:"
+        ]
+        
+        videos = []
+        for i in range(limit):
+            video = ViralVideo(
+                title=twitter_titles[i % len(twitter_titles)],
+                url=f"https://twitter.com/viraltweets/status/17{i+1:014d}",
+                thumbnail="", # Will trigger fallback to SVG placeholder
+                platform=Platform.TWITTER,
+                views=2000000 + i * 150000,
+                likes=100000 + i * 8000,
+                shares=25000 + i * 2000,
+                author=f"@twitteruser{i+1}",
+                viral_score=80.0 - i * 1.8,
+                published_at=datetime.utcnow() - timedelta(hours=i * 3)
+            )
+            videos.append(video)
+        return videos
+
     async def fetch_instagram_viral_videos(self, limit: int = 10) -> List[ViralVideo]:
         """Fetch viral videos from Instagram - Enhanced mock data"""
         videos = []
@@ -425,19 +456,8 @@ class VideoAggregator:
             
         return videos
 
-    async def get_aggregated_viral_videos(self, limit: int = 40, user: Optional[User] = None) -> List[ViralVideo]:
+    async def get_aggregated_viral_videos(self, limit: int = 40) -> List[ViralVideo]:
         """Get viral videos from all platforms and sort by viral score"""
-        
-        # Apply user tier limits
-        if user:
-            plan = get_plan(user.subscription_tier)
-            if plan.max_videos_per_day > 0:
-                limit = min(limit, plan.max_videos_per_day)
-        else:
-            # Anonymous users get free tier limits
-            free_plan = get_plan(SubscriptionTier.FREE)
-            limit = min(limit, free_plan.max_videos_per_day)
-        
         all_videos = []
         
         # Fetch from all platforms concurrently
@@ -470,79 +490,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Middleware to track API usage
-@app.middleware("http")
-async def track_api_usage_middleware(request: Request, call_next):
-    start_time = time.time()
-    
-    # Get current user if available
-    api_key = None
-    if "authorization" in request.headers:
-        auth_header = request.headers["authorization"]
-        if auth_header.startswith("Bearer "):
-            api_key = auth_header.split(" ")[1]
-    elif "x-api-key" in request.headers:
-        api_key = request.headers["x-api-key"]
-    
-    user = None
-    if api_key:
-        user = await auth_service.get_user_by_api_key(api_key)
-    
-    # Process request
-    response = await call_next(request)
-    
-    # Calculate response time
-    process_time = time.time() - start_time
-    response_time_ms = process_time * 1000
-    
-    # Log API usage (async)
-    if request.url.path.startswith("/api/"):
-        asyncio.create_task(
-            auth_service.log_api_usage(
-                user=user,
-                endpoint=str(request.url.path),
-                method=request.method,
-                api_key=api_key,
-                response_time_ms=response_time_ms,
-                status_code=response.status_code
-            )
-        )
-    
-    return response
-
-# Core API Routes
+# API Routes
 @api_router.get("/")
 async def root():
-    return {
-        "message": "Viral Daily API - Monetized viral content aggregation",
-        "version": "2.0",
-        "features": ["Premium Subscriptions", "API Access", "Analytics", "No Ads for Premium"],
-        "subscription_tiers": list(SUBSCRIPTION_PLANS.keys())
-    }
+    return {"message": "Viral Daily API - Aggregating the most viral content from across the web!"}
 
 @api_router.get("/videos", response_model=VideoResponse)
-async def get_viral_videos(
-    platform: Optional[Platform] = None, 
-    limit: int = 10,
-    user: Optional[User] = Depends(get_current_user),
-    request: Request = None
-):
+async def get_viral_videos(platform: Optional[Platform] = None, limit: int = 10):
     """Get viral videos from all platforms or a specific platform"""
     try:
-        # Check rate limits
-        if user and not await auth_service.check_api_rate_limit(user):
-            raise HTTPException(
-                status_code=429, 
-                detail="API rate limit exceeded. Upgrade to Pro for higher limits."
-            )
-        
-        # Get user's plan
-        user_plan = get_plan(user.subscription_tier if user else SubscriptionTier.FREE)
-        
-        # Apply limits based on subscription
-        max_limit = user_plan.max_videos_per_day if user_plan.max_videos_per_day > 0 else limit
-        limit = min(limit, max_limit)
-        
         if platform:
             # Get videos from specific platform
             if platform == Platform.YOUTUBE:
@@ -557,24 +513,16 @@ async def get_viral_videos(
                 videos = []
         else:
             # Get aggregated videos from all platforms
-            videos = await aggregator.get_aggregated_viral_videos(limit, user)
+            videos = await aggregator.get_aggregated_viral_videos(limit)
         
-        # Get ads for free tier users
-        ads = await advertising_service.get_ads_for_platform(platform, user)
-        
-        # Inject ads if user is on free tier
-        if user_plan.has_ads:
-            videos = advertising_service.inject_ads_into_videos(videos, ads, user)
-        
-        # Store videos in database for analytics
+        # Store videos in database for future reference
         for video in videos:
             try:
-                if not video.is_sponsored:  # Don't store ads as viral videos
-                    await db.viral_videos.update_one(
-                        {"url": video.url},
-                        {"$set": video.dict()},
-                        upsert=True
-                    )
+                await db.viral_videos.update_one(
+                    {"url": video.url},
+                    {"$set": video.dict()},
+                    upsert=True
+                )
             except Exception as e:
                 logger.error(f"Error storing video {video.url}: {e}")
         
@@ -582,103 +530,87 @@ async def get_viral_videos(
             videos=videos,
             total=len(videos),
             platform=platform,
-            date=datetime.utcnow(),
-            has_ads=user_plan.has_ads,
-            user_tier=user.subscription_tier if user else SubscriptionTier.FREE
+            date=datetime.utcnow()
         )
     except Exception as e:
         logger.error(f"Error fetching videos: {str(e)}")
         raise HTTPException(status_code=500, detail="Error fetching viral videos")
 
-# User Management Routes
-@api_router.post("/users/register", response_model=User)
-async def register_user(user_data: UserCreate):
-    """Register a new user"""
+@api_router.get("/videos/history")
+async def get_video_history(days: int = 7, platform: Optional[Platform] = None):
+    """Get historical viral videos from the database"""
     try:
-        user = await auth_service.create_user(user_data.email, user_data.name)
-        return user
+        filter_query = {
+            "fetched_at": {
+                "$gte": datetime.utcnow() - timedelta(days=days)
+            }
+        }
+        
+        if platform:
+            filter_query["platform"] = platform.value
+        
+        videos = await db.viral_videos.find(filter_query).sort("viral_score", -1).to_list(100)
+        return {"videos": videos, "total": len(videos)}
     except Exception as e:
-        logger.error(f"Error registering user: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error registering user")
+        logger.error(f"Error fetching video history: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error fetching video history")
 
-@api_router.get("/users/me", response_model=User)
-async def get_current_user_info(user: User = Depends(require_user)):
-    """Get current user information"""
-    return user
-
-@api_router.get("/users/me/analytics")
-async def get_user_analytics(user: User = Depends(require_user)):
-    """Get user analytics"""
+@api_router.post("/subscribe", response_model=Subscription)
+async def create_subscription(subscription_data: SubscriptionCreate):
+    """Create a new subscription for daily viral video delivery"""
     try:
-        analytics = await auth_service.get_user_analytics(user.id)
-        return analytics
-    except Exception as e:
-        logger.error(f"Error fetching user analytics: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error fetching analytics")
-
-# Subscription Management Routes
-@api_router.get("/subscription/plans")
-async def get_subscription_plans():
-    """Get all available subscription plans"""
-    plans_data = []
-    for tier, plan in SUBSCRIPTION_PLANS.items():
-        plan_dict = plan.dict()
-        plan_dict["savings_percentage"] = round(((plan.price_monthly * 12 - plan.price_yearly) / (plan.price_monthly * 12) * 100), 1) if plan.price_monthly > 0 else 0
-        plans_data.append(plan_dict)
-    
-    return {"plans": plans_data}
-
-@api_router.get("/subscription/me")
-async def get_my_subscription(user: User = Depends(require_user)):
-    """Get current user's subscription details"""
-    plan = get_plan(user.subscription_tier)
-    return {
-        "user_id": user.id,
-        "current_tier": user.subscription_tier,
-        "plan_details": plan.dict(),
-        "expires_at": user.subscription_expires_at,
-        "api_usage_today": user.daily_api_calls,
-        "api_limit": user.max_daily_api_calls
-    }
-
-# Legacy subscription route (for backward compatibility)
-@api_router.post("/subscribe", response_model=OldSubscription)
-async def create_legacy_subscription(subscription_data: SubscriptionCreate):
-    """Create a legacy subscription for daily viral video delivery"""
-    try:
-        subscription = OldSubscription(**subscription_data.dict())
+        subscription = Subscription(**subscription_data.dict())
         await db.subscriptions.insert_one(subscription.dict())
         return subscription
     except Exception as e:
         logger.error(f"Error creating subscription: {str(e)}")
         raise HTTPException(status_code=500, detail="Error creating subscription")
 
-# Analytics Routes (Business Tier)
-@api_router.get("/analytics/dashboard")
-async def get_analytics_dashboard(user: User = Depends(require_business_user)):
-    """Get comprehensive analytics dashboard"""
+@api_router.get("/subscriptions")
+async def get_subscriptions():
+    """Get all active subscriptions"""
     try:
-        dashboard_data = await analytics_service.create_analytics_dashboard_data(user.id)
-        return dashboard_data
+        subscriptions = await db.subscriptions.find({"active": True}).to_list(1000)
+        return {"subscriptions": subscriptions, "total": len(subscriptions)}
     except Exception as e:
-        logger.error(f"Error fetching dashboard data: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error fetching analytics")
+        logger.error(f"Error fetching subscriptions: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error fetching subscriptions")
 
-@api_router.get("/analytics/platforms")
-async def get_platform_analytics(
-    platform: Optional[Platform] = None,
-    days: int = 30,
-    user: User = Depends(require_pro_user)
-):
-    """Get platform-specific analytics"""
+@api_router.post("/deliver-daily")
+async def deliver_daily_videos(background_tasks: BackgroundTasks):
+    """Trigger daily delivery of viral videos to subscribers"""
     try:
-        analytics = await analytics_service.get_platform_analytics(platform, days)
-        return analytics
+        # Get today's top viral videos
+        videos = await aggregator.get_aggregated_viral_videos(10)
+        
+        # Get active subscriptions
+        subscriptions = await db.subscriptions.find({"active": True}).to_list(1000)
+        
+        # Schedule delivery for each subscriber
+        for subscription in subscriptions:
+            background_tasks.add_task(deliver_to_subscriber, subscription, videos)
+        
+        return {"message": f"Daily delivery scheduled for {len(subscriptions)} subscribers"}
     except Exception as e:
-        logger.error(f"Error fetching platform analytics: {str(e)}")
-        raise HTTPException(status_code=500, detail="Error fetching platform analytics")
+        logger.error(f"Error scheduling daily delivery: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error scheduling daily delivery")
 
-# Include routers
+async def deliver_to_subscriber(subscription: dict, videos: List[ViralVideo]):
+    """Deliver videos to a specific subscriber"""
+    try:
+        # TODO: Implement actual delivery logic
+        # For now, just log the delivery
+        logger.info(f"Delivering {len(videos)} videos to subscriber {subscription['id']}")
+        
+        # Update last delivery timestamp
+        await db.subscriptions.update_one(
+            {"id": subscription["id"]},
+            {"$set": {"last_delivery": datetime.utcnow()}}
+        )
+    except Exception as e:
+        logger.error(f"Error delivering to subscriber {subscription.get('id')}: {str(e)}")
+
+# Include the router in the main app
 app.include_router(api_router)
 
 app.add_middleware(
@@ -688,16 +620,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-@app.on_event("startup")
-async def startup_event():
-    """Initialize sample data and services"""
-    try:
-        # Create sample advertisements
-        await advertising_service.create_sample_ads()
-        logger.info("Startup completed successfully")
-    except Exception as e:
-        logger.error(f"Error during startup: {e}")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
