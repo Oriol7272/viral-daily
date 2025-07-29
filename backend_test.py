@@ -313,18 +313,43 @@ class ViralDailyAPITester:
             "billing_cycle": "monthly"
         }
         
-        success, response = self.run_test(
-            "PayPal Create Order (Unauthenticated)",
-            "POST",
-            "payments/paypal/create-order",
-            503,  # Expected to fail due to missing credentials
-            data=order_data
+        # First check if PayPal is available
+        avail_success, avail_response = self.run_test(
+            "PayPal Availability Pre-check (Unauth)",
+            "GET",
+            "payments/paypal/available",
+            200
         )
         
-        if success:
-            print("   ✅ Properly handles unauthenticated request")
-            return True
-        return False
+        if avail_success and avail_response.get('available'):
+            # PayPal is available, but should still work without auth for order creation
+            success, response = self.run_test(
+                "PayPal Create Order (Unauthenticated - Real Credentials)",
+                "POST",
+                "payments/paypal/create-order",
+                200,  # Should succeed even without auth
+                data=order_data
+            )
+            
+            if success and isinstance(response, dict):
+                print("   🎉 PayPal Order Creation works without authentication!")
+                print(f"   Order ID: {response.get('order_id', 'N/A')}")
+                return True
+            return False
+        else:
+            # PayPal not available, expect 503 error
+            success, response = self.run_test(
+                "PayPal Create Order (Unauthenticated - No Credentials)",
+                "POST",
+                "payments/paypal/create-order",
+                503,  # Expected to fail due to missing credentials
+                data=order_data
+            )
+            
+            if success:
+                print("   ✅ Properly handles unauthenticated request with missing credentials")
+                return True
+            return False
 
     def test_paypal_create_order_authenticated(self):
         """Test POST /api/payments/paypal/create-order with authentication and real credentials"""
