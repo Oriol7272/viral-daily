@@ -111,7 +111,7 @@ class PayPalService:
                 session_id=order['id'],
                 payment_id=order['id'],
                 amount=amount,
-                currency="usd",
+                currency="eur",
                 status=PaymentStatus.PENDING,
                 payment_method="paypal",
                 subscription_tier=subscription_tier,
