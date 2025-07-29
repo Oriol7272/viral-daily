@@ -343,7 +343,7 @@ class ViralDailyAPITester:
         return False
 
     def test_paypal_create_order_unauthenticated(self):
-        """Test POST /api/payments/paypal/create-order without authentication (Business Account)"""
+        """Test POST /api/payments/paypal/create-order without authentication (NEW Live Credentials)"""
         order_data = {
             "subscription_tier": "pro",
             "billing_cycle": "monthly"
