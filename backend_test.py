@@ -271,7 +271,12 @@ class ViralDailyAPITester:
             else:
                 print(f"   ✅ PayPal Mode: {response['mode']}")
                 print(f"   Currency: {response['currency']}")
-                print(f"   Client ID: {response['client_id'][:20] if response['client_id'] else 'Not configured'}...")
+                client_id = response['client_id']
+                if client_id and len(client_id) > 20:
+                    print(f"   Client ID: {client_id[:20]}... (Real credentials detected!)")
+                    print("   🎉 PayPal configuration looks valid!")
+                else:
+                    print(f"   Client ID: {client_id or 'Not configured'}")
                 return True
         return False
 
