@@ -168,8 +168,6 @@ metadata:
 
 test_plan:
   current_focus:
-    - "PayPal payment integration backend API endpoints"
-    - "PayPal router registration in main server"
     - "PayPal payment button component"
     - "Payment modal with PayPal option"
   stuck_tasks: []
