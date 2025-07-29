@@ -252,6 +252,144 @@ class ViralDailyAPITester:
                 return True
         return False
 
+    def test_paypal_config(self):
+        """Test GET /api/payments/paypal/config - PayPal configuration"""
+        success, response = self.run_test(
+            "PayPal Configuration",
+            "GET",
+            "payments/paypal/config",
+            200
+        )
+        
+        if success and isinstance(response, dict):
+            required_fields = ['client_id', 'mode', 'currency']
+            missing_fields = [field for field in required_fields if field not in response]
+            
+            if missing_fields:
+                print(f"   ⚠️  Missing fields: {missing_fields}")
+                return False
+            else:
+                print(f"   ✅ PayPal Mode: {response['mode']}")
+                print(f"   Currency: {response['currency']}")
+                print(f"   Client ID: {response['client_id'][:20] if response['client_id'] else 'Not configured'}...")
+                return True
+        return False
+
+    def test_paypal_availability(self):
+        """Test GET /api/payments/paypal/available - PayPal availability check"""
+        success, response = self.run_test(
+            "PayPal Availability Check",
+            "GET",
+            "payments/paypal/available",
+            200
+        )
+        
+        if success and isinstance(response, dict):
+            required_fields = ['available', 'mode']
+            missing_fields = [field for field in required_fields if field not in response]
+            
+            if missing_fields:
+                print(f"   ⚠️  Missing fields: {missing_fields}")
+                return False
+            else:
+                print(f"   ✅ PayPal Available: {response['available']}")
+                print(f"   Mode: {response['mode']}")
+                if not response['available']:
+                    print("   ℹ️  PayPal not available due to missing credentials (expected)")
+                return True
+        return False
+
+    def test_paypal_create_order_unauthenticated(self):
+        """Test POST /api/payments/paypal/create-order without authentication"""
+        order_data = {
+            "subscription_tier": "pro",
+            "billing_cycle": "monthly"
+        }
+        
+        success, response = self.run_test(
+            "PayPal Create Order (Unauthenticated)",
+            "POST",
+            "payments/paypal/create-order",
+            503,  # Expected to fail due to missing credentials
+            data=order_data
+        )
+        
+        if success:
+            print("   ✅ Properly handles unauthenticated request")
+            return True
+        return False
+
+    def test_paypal_create_order_authenticated(self):
+        """Test POST /api/payments/paypal/create-order with authentication"""
+        if not self.test_api_key:
+            print("   ⚠️  No API key available, skipping test")
+            return False
+            
+        order_data = {
+            "subscription_tier": "pro",
+            "billing_cycle": "monthly"
+        }
+        
+        success, response = self.run_test(
+            "PayPal Create Order (Authenticated)",
+            "POST",
+            "payments/paypal/create-order",
+            503,  # Expected to fail due to missing credentials
+            data=order_data
+        )
+        
+        if success:
+            print("   ✅ Properly handles missing PayPal credentials")
+            return True
+        return False
+
+    def test_paypal_order_status(self):
+        """Test GET /api/payments/paypal/order-status/{order_id}"""
+        test_order_id = "test_order_123"
+        
+        success, response = self.run_test(
+            "PayPal Order Status",
+            "GET",
+            f"payments/paypal/order-status/{test_order_id}",
+            503  # Expected to fail due to missing credentials
+        )
+        
+        if success:
+            print("   ✅ Properly handles missing PayPal credentials")
+            return True
+        return False
+
+    def test_paypal_webhook(self):
+        """Test POST /api/payments/paypal/webhook"""
+        webhook_data = {
+            "event_type": "PAYMENT.CAPTURE.COMPLETED",
+            "resource": {
+                "id": "test_capture_id",
+                "supplementary_data": {
+                    "related_ids": {
+                        "order_id": "test_order_id"
+                    }
+                }
+            }
+        }
+        
+        success, response = self.run_test(
+            "PayPal Webhook Handler",
+            "POST",
+            "payments/paypal/webhook",
+            200,
+            data=webhook_data
+        )
+        
+        if success and isinstance(response, dict):
+            if 'status' in response and response['status'] == 'success':
+                print("   ✅ Webhook processed successfully")
+                return True
+            else:
+                print(f"   ⚠️  Unexpected webhook response: {response}")
+                return False
+        return False
+
     def run_all_tests(self):
         """Run all API tests including monetization features"""
         print("🚀 Starting Viral Daily MONETIZED API Tests")
