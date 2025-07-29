@@ -415,10 +415,10 @@ class ViralDailyAPITester:
         if avail_success and avail_response.get('available'):
             # PayPal is available, expect successful order creation
             success, response = self.run_test(
-                "PayPal Create Order (Business Account - EUR Currency)",
+                "PayPal Create Order (NEW Live Credentials - EUR Currency)",
                 "POST",
                 "payments/paypal/create-order",
-                200,  # Should succeed with business credentials
+                200,  # Should succeed with NEW credentials
                 data=order_data
             )
             
