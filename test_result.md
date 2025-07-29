@@ -109,7 +109,7 @@ backend:
     implemented: true
     working: false
     file: "/app/backend/paypal_integration.py"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
