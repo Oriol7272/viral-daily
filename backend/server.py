@@ -426,11 +426,14 @@ class VideoAggregator:
                     engagement_score = likes + (retweets * 3) + (replies * 2)
                     viral_score = min(90.0, max(10.0, engagement_score / 1000))
                     
+                    # Prepare tweet title and thumbnail
+                    tweet_title = tweet.text[:100] + "..." if len(tweet.text) > 100 else tweet.text
+                    
                     # Create video object
                     video = ViralVideo(
-                        title=tweet.text[:100] + "..." if len(tweet.text) > 100 else tweet.text,
+                        title=tweet_title,
                         url=f"https://twitter.com/i/status/{tweet.id}",
-                        thumbnail="", # Will trigger fallback to SVG placeholder
+                        thumbnail=self.generate_platform_thumbnail(Platform.TWITTER, viral_score, tweet_title),
                         platform=Platform.TWITTER,
                         views=metrics.get('impression_count', 0),
                         likes=likes,
