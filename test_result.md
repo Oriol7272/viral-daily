@@ -219,6 +219,9 @@ metadata:
 
 test_plan:
   current_focus:
+    - "Fix startup validation error in Advertisement model"
+    - "Video aggregation API endpoint"
+    - "Frontend video display and platform filters"
     - "PayPal payment button component"
     - "Payment modal with PayPal option"
   stuck_tasks: []
