@@ -175,6 +175,18 @@ backend:
         comment: "PayPal router successfully registered and accessible at /api/payments/paypal/* endpoints. All routes are properly configured and responding."
 
 frontend:
+  - task: "Frontend video display and platform filters"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Frontend loading successfully. Videos from YouTube and Instagram are displaying with proper thumbnails, titles, and stats. Platform filtering buttons are visible and functional."
+
   - task: "PayPal payment button component"
     implemented: true
     working: "unknown"
