@@ -43,8 +43,7 @@ const VideoCard = ({ video }) => {
     const icons = {
       youtube: '📺',
       tiktok: '🎵',
-      twitter: '🐦',
-      instagram: '📷'
+      twitter: '🐦'
     };
     return icons[platform] || '🎬';
   };
