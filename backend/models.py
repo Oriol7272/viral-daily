@@ -11,7 +11,6 @@ class Platform(str, Enum):
     YOUTUBE = "youtube"
     TIKTOK = "tiktok"
     TWITTER = "twitter"
-    INSTAGRAM = "instagram"
     ADVERTISEMENT = "advertisement"
 
 class DeliveryMethod(str, Enum):
