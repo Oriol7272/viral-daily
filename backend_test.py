@@ -5,7 +5,7 @@ from datetime import datetime
 import uuid
 
 class ViralDailyAPITester:
-    def __init__(self, base_url="https://e9c4e6b3-23fd-4c1f-81c6-d8dee2f62140.preview.emergentagent.com"):
+    def __init__(self, base_url="https://7b54aa5d-9af4-487f-bf4f-45584a53206f.preview.emergentagent.com"):
         self.base_url = base_url
         self.api_url = f"{base_url}/api"
         self.tests_run = 0
