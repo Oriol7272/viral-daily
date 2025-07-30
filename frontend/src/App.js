@@ -14,8 +14,7 @@ const PlatformFilter = ({ selectedPlatform, onPlatformChange }) => {
     { key: 'all', label: 'All Platforms', color: 'bg-purple-500' },
     { key: 'youtube', label: 'YouTube', color: 'bg-red-500' },
     { key: 'tiktok', label: 'TikTok', color: 'bg-black' },
-    { key: 'twitter', label: 'Twitter', color: 'bg-blue-500' },
-    { key: 'instagram', label: 'Instagram', color: 'bg-pink-500' }
+    { key: 'twitter', label: 'Twitter', color: 'bg-blue-500' }
   ];
 
   return (
