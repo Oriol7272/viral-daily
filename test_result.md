@@ -105,6 +105,30 @@
 user_problem_statement: "Remove Instagram support and verify YouTube, TikTok, and X (Twitter) platforms work correctly. Test payment methods and ads functionality."
 
 backend:
+  - task: "Remove Instagram platform support"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py, /app/backend/models.py, /app/backend/advertising.py, /app/frontend/src/App.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Successfully removed Instagram platform from Platform enum, removed fetch_instagram_viral_videos function, updated video aggregation to use 3 platforms instead of 4, removed Instagram from frontend filters, and updated advertising target platforms. Application loads correctly with only YouTube, TikTok, and Twitter."
+
+  - task: "Video aggregation for YouTube, TikTok, and X (Twitter)"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Video aggregation updated to focus on 3 platforms: YouTube (real API), TikTok (mock data), and Twitter (real API). Platform filtering works correctly in frontend with only these 3 platforms displayed."
+
   - task: "Fix startup validation error in Advertisement model"
     implemented: true
     working: true
