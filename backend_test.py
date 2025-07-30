@@ -1017,6 +1017,106 @@ class ViralDailyAPITester:
         
         return success and success2
 
+    def test_advertisement_system_after_thumbnail_fix(self):
+        """Test that advertisement system still works correctly after thumbnail changes"""
+        print("\n📺 ADVERTISEMENT SYSTEM TESTING (Post-Thumbnail Fix)...")
+        
+        # Test 1: Get videos without authentication (should have ads for free tier)
+        success, response = self.run_test(
+            "Videos with Ads (Free Tier)",
+            "GET",
+            "videos",
+            200,
+            params={'limit': 20}
+        )
+        
+        if success and isinstance(response, dict):
+            videos = response.get('videos', [])
+            has_ads = response.get('has_ads', False)
+            user_tier = response.get('user_tier', 'unknown')
+            
+            print(f"   User Tier: {user_tier}")
+            print(f"   Has Ads Flag: {has_ads}")
+            print(f"   Total Videos: {len(videos)}")
+            
+            # Check for sponsored content
+            sponsored_videos = [v for v in videos if v.get('is_sponsored', False)]
+            regular_videos = [v for v in videos if not v.get('is_sponsored', False)]
+            
+            print(f"   Sponsored Videos (Ads): {len(sponsored_videos)}")
+            print(f"   Regular Videos: {len(regular_videos)}")
+            
+            if has_ads and user_tier == 'free':
+                if sponsored_videos:
+                    print(f"   ✅ Advertisement injection working - {len(sponsored_videos)} ads found")
+                    
+                    # Check ad structure
+                    for i, ad in enumerate(sponsored_videos[:2]):  # Check first 2 ads
+                        print(f"      Ad {i+1}: {ad.get('title', 'No title')[:50]}")
+                        print(f"         Platform: {ad.get('platform', 'unknown')}")
+                        print(f"         Thumbnail: {'✅ Present' if ad.get('thumbnail') else '❌ Missing'}")
+                        print(f"         URL: {'✅ Present' if ad.get('url') else '❌ Missing'}")
+                    
+                    # Verify ads target correct platforms (youtube, tiktok, twitter only)
+                    ad_platforms = set(ad.get('platform', '').lower() for ad in sponsored_videos)
+                    expected_ad_platforms = {'youtube', 'tiktok', 'twitter'}
+                    
+                    if ad_platforms.issubset(expected_ad_platforms):
+                        print(f"   ✅ Ads target correct platforms: {ad_platforms}")
+                    else:
+                        unexpected_platforms = ad_platforms - expected_ad_platforms
+                        print(f"   ⚠️  Ads targeting unexpected platforms: {unexpected_platforms}")
+                    
+                    return True
+                else:
+                    print(f"   ❌ No ads found despite has_ads=True for free tier")
+                    return False
+            else:
+                print(f"   ℹ️  No ads expected for tier: {user_tier}")
+                return True
+        
+        return False
+    
+    def test_advertisement_platform_targeting(self):
+        """Test that ads are properly targeted to the correct platforms"""
+        print("\n🎯 ADVERTISEMENT PLATFORM TARGETING TEST...")
+        
+        # Test each platform individually to see if ads are injected
+        platforms = ['youtube', 'tiktok', 'twitter']
+        all_passed = True
+        
+        for platform in platforms:
+            success, response = self.run_test(
+                f"Ads for {platform.title()} Platform",
+                "GET",
+                "videos",
+                200,
+                params={'platform': platform, 'limit': 15}
+            )
+            
+            if success and isinstance(response, dict):
+                videos = response.get('videos', [])
+                has_ads = response.get('has_ads', False)
+                
+                sponsored_videos = [v for v in videos if v.get('is_sponsored', False)]
+                
+                print(f"   {platform.upper()}: {len(videos)} total, {len(sponsored_videos)} ads, has_ads={has_ads}")
+                
+                if has_ads:
+                    # Check that ads are for the correct platform
+                    for ad in sponsored_videos:
+                        ad_platform = ad.get('platform', '').lower()
+                        if ad_platform != platform:
+                            print(f"      ❌ Ad platform mismatch: expected {platform}, got {ad_platform}")
+                            all_passed = False
+                        else:
+                            print(f"      ✅ Ad correctly targeted to {platform}")
+            else:
+                print(f"   ❌ Failed to get {platform} videos")
+                all_passed = False
+        
+        return all_passed
+
     def run_all_tests(self):
         """Run all API tests including monetization and PayPal features"""
         print("🚀 Starting Viral Daily MONETIZED API Tests with PayPal NEW Live Credentials Integration")
