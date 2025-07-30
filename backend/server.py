@@ -59,7 +59,6 @@ class VideoAggregator:
         self.youtube_api_key = os.getenv('YOUTUBE_API_KEY')
         self.twitter_bearer_token = os.getenv('TWITTER_BEARER_TOKEN')
         self.tiktok_access_token = os.getenv('TIKTOK_ACCESS_TOKEN')
-        self.instagram_access_token = os.getenv('INSTAGRAM_ACCESS_TOKEN')
         
     def get_youtube_service(self):
         """Initialize YouTube API service"""
