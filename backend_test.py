@@ -1028,6 +1028,8 @@ class ViralDailyAPITester:
             ("Get All Videos (No Auth)", self.test_get_all_videos),
             ("Platform Filtering", self.test_platform_filtering),
             ("Instagram Removal Verification", self.test_instagram_removal_verification),
+            ("Comprehensive Thumbnail Generation", self.test_thumbnail_generation_comprehensive),
+            ("Platform-Specific Thumbnails", self.test_platform_specific_thumbnails),
         ]
         
         # Test monetization features
