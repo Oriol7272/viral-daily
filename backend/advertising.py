@@ -127,7 +127,7 @@ class AdvertisingService:
                 "image_url": "https://via.placeholder.com/300x200/9C27B0/FFFFFF?text=Content+Tools",
                 "click_url": "https://example.com/content-creation-tools",
                 "advertiser": "ViralMaker AI",
-                "target_platforms": ["youtube", "instagram", "twitter", "tiktok"],
+                "target_platforms": ["youtube", "twitter", "tiktok"],
                 "budget": 1500.0,
                 "cost_per_click": 1.00,
                 "is_active": True
