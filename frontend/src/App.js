@@ -81,15 +81,13 @@ const VideoCard = ({ video }) => {
       const colors = {
         youtube: '#FF0000',
         tiktok: '#000000', 
-        twitter: '#1DA1F2',
-        instagram: '#E4405F'
+        twitter: '#1DA1F2'
       };
       const bgColor = colors[video.platform] || '#6B7280';
       const platformIcons = {
         youtube: '📺',
         tiktok: '🎵',
-        twitter: '🐦',
-        instagram: '📷'
+        twitter: '🐦'
       };
       const icon = platformIcons[video.platform] || '🎬';
       const platformName = video.platform.toUpperCase();
