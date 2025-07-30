@@ -74,6 +74,17 @@ const VideoCard = ({ video }) => {
   };
 
   const getReliableThumbnail = () => {
+    // Check if we have a valid thumbnail from the backend
+    if (video.thumbnail && 
+        video.thumbnail.trim() !== '' && 
+        !video.thumbnail.includes('via.placeholder.com') && 
+        !video.thumbnail.includes('mock') &&
+        (video.thumbnail.startsWith('http') || video.thumbnail.startsWith('data:'))) {
+      // Use the backend-provided thumbnail (could be HTTP URL or data URI)
+      return video.thumbnail;
+    }
+    
+    // Fallback to frontend-generated SVG only if no valid backend thumbnail
     if (imageError || !video.thumbnail || video.thumbnail.includes('via.placeholder.com') || video.thumbnail.includes('mock')) {
       // Create inline SVG data URI for reliable thumbnails
       const colors = {
