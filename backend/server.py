@@ -444,10 +444,9 @@ class VideoAggregator:
         
         # Fetch from all platforms concurrently
         tasks = [
-            self.fetch_youtube_viral_videos(limit // 4),
-            self.fetch_tiktok_viral_videos(limit // 4),
-            self.fetch_twitter_viral_videos(limit // 4),
-            self.fetch_instagram_viral_videos(limit // 4)
+            self.fetch_youtube_viral_videos(limit // 3),
+            self.fetch_tiktok_viral_videos(limit // 3),
+            self.fetch_twitter_viral_videos(limit // 3)
         ]
         
         results = await asyncio.gather(*tasks, return_exceptions=True)
