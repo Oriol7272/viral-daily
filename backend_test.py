@@ -260,6 +260,8 @@ class ViralDailyAPITester:
                     print(f"   ✅ All expected platforms present")
         
         return not instagram_found
+
+    def test_user_registration(self):
         """Test POST /api/users/register - User registration"""
         test_email = f"test_{uuid.uuid4().hex[:8]}@example.com"
         test_name = f"Test User {datetime.now().strftime('%H%M%S')}"
