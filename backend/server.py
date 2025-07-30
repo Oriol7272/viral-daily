@@ -521,8 +521,6 @@ async def get_viral_videos(
                 videos = await aggregator.fetch_tiktok_viral_videos(limit)
             elif platform == Platform.TWITTER:
                 videos = await aggregator.fetch_twitter_viral_videos(limit)
-            elif platform == Platform.INSTAGRAM:
-                videos = await aggregator.fetch_instagram_viral_videos(limit)
             else:
                 videos = []
         else:
