@@ -1159,7 +1159,7 @@ class ViralDailyAPITester:
             ("Advertisement Platform Targeting", self.test_advertisement_platform_targeting),
         ]
         
-        all_tests = core_tests + monetization_tests + paypal_tests
+        all_tests = core_tests + monetization_tests + paypal_tests + advertisement_tests
         
         for test_name, test_func in all_tests:
             print(f"\n📋 Running {test_name} Tests...")
