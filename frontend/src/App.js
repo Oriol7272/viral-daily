@@ -61,8 +61,7 @@ const VideoCard = ({ video }) => {
     const gradients = {
       youtube: 'from-red-500 to-red-600',
       tiktok: 'from-black to-gray-800',
-      twitter: 'from-blue-500 to-blue-600',
-      instagram: 'from-pink-500 to-purple-600'
+      twitter: 'from-blue-500 to-blue-600'
     };
     return gradients[platform] || 'from-gray-500 to-gray-600';
   };
