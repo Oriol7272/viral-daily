@@ -24,7 +24,7 @@ class AdvertisingService:
         # Build query
         query = {"is_active": True}
         if platform:
-            query["target_platforms"] = {"$in": [platform.value, "all"]}
+            query["target_platforms"] = {"$in": [platform.value]}
         
         # Get active ads
         ads_cursor = self.db.advertisements.find(query).limit(limit)
