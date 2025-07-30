@@ -264,7 +264,9 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Frontend comprehensive functionality testing"
+    - "Video aggregation with thumbnails - TikTok and Twitter fixes"
+    - "PayPal integration verification"
+    - "Advertisement system verification"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
