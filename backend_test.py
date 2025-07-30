@@ -127,7 +127,139 @@ class ViralDailyAPITester:
             return len(videos) > 0
         return False
 
-    def test_user_registration(self):
+    def test_platform_filtering(self):
+        """Test platform filtering for YouTube, TikTok, Twitter (Instagram should be removed)"""
+        platforms_to_test = ['youtube', 'tiktok', 'twitter']
+        forbidden_platform = 'instagram'
+        
+        print(f"\n🔍 Testing platform filtering for {len(platforms_to_test)} platforms...")
+        
+        all_passed = True
+        
+        # Test each allowed platform
+        for platform in platforms_to_test:
+            success, response = self.run_test(
+                f"Get {platform.title()} Videos",
+                "GET",
+                "videos",
+                200,
+                params={'platform': platform, 'limit': 5}
+            )
+            
+            if success and isinstance(response, dict):
+                videos = response.get('videos', [])
+                platform_filter = response.get('platform')
+                
+                print(f"   {platform.title()}: {len(videos)} videos, filter: {platform_filter}")
+                
+                # Check that all videos are from the requested platform
+                if videos:
+                    platforms_found = set(v.get('platform') for v in videos)
+                    if len(platforms_found) == 1 and platform in platforms_found:
+                        print(f"   ✅ All videos are from {platform}")
+                    else:
+                        print(f"   ❌ Mixed platforms found: {platforms_found}")
+                        all_passed = False
+                else:
+                    print(f"   ⚠️  No videos returned for {platform}")
+            else:
+                print(f"   ❌ Failed to get {platform} videos")
+                all_passed = False
+        
+        # Test forbidden Instagram platform
+        print(f"\n🚫 Testing forbidden platform: {forbidden_platform}")
+        success, response = self.run_test(
+            f"Get {forbidden_platform.title()} Videos (Should Fail)",
+            "GET",
+            "videos",
+            200,  # API might return 200 with empty results or error
+            params={'platform': forbidden_platform, 'limit': 5}
+        )
+        
+        if success and isinstance(response, dict):
+            videos = response.get('videos', [])
+            if videos:
+                # Check if any Instagram videos are returned
+                instagram_videos = [v for v in videos if v.get('platform') == 'instagram']
+                if instagram_videos:
+                    print(f"   ❌ CRITICAL: {len(instagram_videos)} Instagram videos found! Instagram should be removed.")
+                    all_passed = False
+                else:
+                    print(f"   ✅ No Instagram videos returned (good)")
+            else:
+                print(f"   ✅ No videos returned for Instagram (expected)")
+        
+        return all_passed
+
+    def test_instagram_removal_verification(self):
+        """Comprehensive test to verify Instagram is completely removed"""
+        print(f"\n🔍 Comprehensive Instagram Removal Verification...")
+        
+        # Test 1: Get all videos and check for Instagram
+        success, response = self.run_test(
+            "All Videos - Instagram Check",
+            "GET",
+            "videos",
+            200,
+            params={'limit': 50}  # Get more videos to be thorough
+        )
+        
+        instagram_found = False
+        if success and isinstance(response, dict):
+            videos = response.get('videos', [])
+            instagram_videos = [v for v in videos if v.get('platform') == 'instagram']
+            
+            if instagram_videos:
+                print(f"   ❌ CRITICAL: Found {len(instagram_videos)} Instagram videos in general feed!")
+                instagram_found = True
+                for video in instagram_videos[:3]:  # Show first 3
+                    print(f"      - {video.get('title', 'No title')} ({video.get('url', 'No URL')})")
+            else:
+                print(f"   ✅ No Instagram videos found in general feed")
+        
+        # Test 2: Try to explicitly request Instagram videos
+        success2, response2 = self.run_test(
+            "Explicit Instagram Request",
+            "GET",
+            "videos",
+            200,
+            params={'platform': 'instagram', 'limit': 10}
+        )
+        
+        if success2 and isinstance(response2, dict):
+            videos2 = response2.get('videos', [])
+            instagram_videos2 = [v for v in videos2 if v.get('platform') == 'instagram']
+            
+            if instagram_videos2:
+                print(f"   ❌ CRITICAL: Instagram platform filter returned {len(instagram_videos2)} videos!")
+                instagram_found = True
+            else:
+                print(f"   ✅ Instagram platform filter returns no videos (expected)")
+        
+        # Test 3: Check platform list in response
+        if success and isinstance(response, dict):
+            videos = response.get('videos', [])
+            if videos:
+                unique_platforms = set(v.get('platform') for v in videos)
+                expected_platforms = {'youtube', 'tiktok', 'twitter'}
+                
+                print(f"   Platforms in response: {unique_platforms}")
+                print(f"   Expected platforms: {expected_platforms}")
+                
+                if 'instagram' in unique_platforms:
+                    print(f"   ❌ CRITICAL: Instagram found in platform list!")
+                    instagram_found = True
+                else:
+                    print(f"   ✅ Instagram not in platform list")
+                
+                # Check if we have all expected platforms
+                missing_platforms = expected_platforms - unique_platforms
+                if missing_platforms:
+                    print(f"   ⚠️  Missing expected platforms: {missing_platforms}")
+                else:
+                    print(f"   ✅ All expected platforms present")
+        
+        return not instagram_found
         """Test POST /api/users/register - User registration"""
         test_email = f"test_{uuid.uuid4().hex[:8]}@example.com"
         test_name = f"Test User {datetime.now().strftime('%H%M%S')}"
