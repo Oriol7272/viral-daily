@@ -101,6 +101,29 @@ class ViralDailyAPITester:
                 is_sorted = all(viral_scores[i] >= viral_scores[i+1] for i in range(len(viral_scores)-1))
                 print(f"   Viral score sorting: {'✅ Correct' if is_sorted else '❌ Incorrect'}")
                 
+                # Check platforms - should only have YouTube, TikTok, Twitter (NO Instagram)
+                platforms = set(v.get('platform') for v in videos)
+                expected_platforms = {'youtube', 'tiktok', 'twitter'}
+                forbidden_platforms = {'instagram'}
+                
+                print(f"   Platforms found: {platforms}")
+                
+                # Check for forbidden Instagram platform
+                instagram_found = any(platform in forbidden_platforms for platform in platforms)
+                if instagram_found:
+                    print(f"   ❌ CRITICAL: Instagram videos found! Instagram should be removed.")
+                    return False
+                else:
+                    print(f"   ✅ Instagram successfully removed - no Instagram videos found")
+                
+                # Check if we have the expected platforms
+                valid_platforms = platforms.issubset(expected_platforms)
+                if valid_platforms:
+                    print(f"   ✅ All platforms are valid: {platforms}")
+                else:
+                    unexpected = platforms - expected_platforms
+                    print(f"   ⚠️  Unexpected platforms found: {unexpected}")
+                
             return len(videos) > 0
         return False
 
