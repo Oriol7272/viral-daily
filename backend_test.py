@@ -791,6 +791,8 @@ class ViralDailyAPITester:
         core_tests = [
             ("Root Endpoint", self.test_root_endpoint),
             ("Get All Videos (No Auth)", self.test_get_all_videos),
+            ("Platform Filtering", self.test_platform_filtering),
+            ("Instagram Removal Verification", self.test_instagram_removal_verification),
         ]
         
         # Test monetization features
