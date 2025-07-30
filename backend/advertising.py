@@ -105,7 +105,7 @@ class AdvertisingService:
                 "image_url": "https://via.placeholder.com/300x200/4285F4/FFFFFF?text=Social+Media+Boost",
                 "click_url": "https://example.com/social-media-boost",
                 "advertiser": "SocialGrow Pro",
-                "target_platforms": ["youtube", "instagram", "twitter", "tiktok"],
+                "target_platforms": ["youtube", "twitter", "tiktok"],
                 "budget": 1000.0,
                 "cost_per_click": 0.50,
                 "is_active": True
