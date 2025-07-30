@@ -1153,6 +1153,12 @@ class ViralDailyAPITester:
             ("PayPal Error Handling", self.test_paypal_error_handling),
         ]
         
+        # Test advertisement system after thumbnail fixes
+        advertisement_tests = [
+            ("Advertisement System (Post-Thumbnail Fix)", self.test_advertisement_system_after_thumbnail_fix),
+            ("Advertisement Platform Targeting", self.test_advertisement_platform_targeting),
+        ]
+        
         all_tests = core_tests + monetization_tests + paypal_tests
         
         for test_name, test_func in all_tests:
