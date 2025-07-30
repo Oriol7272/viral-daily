@@ -108,6 +108,60 @@ class VideoAggregator:
         # Final viral score
         viral_score = (view_score + engagement_score) * recency_multiplier
         return min(viral_score, 100.0)  # Cap at 100
+    
+    def generate_platform_thumbnail(self, platform: Platform, viral_score: float, title: str = "") -> str:
+        """Generate SVG thumbnail for platforms without real thumbnails"""
+        from urllib.parse import quote
+        
+        # Platform-specific colors and icons
+        platform_config = {
+            Platform.TIKTOK: {
+                'color': '#000000',
+                'icon': '🎵',
+                'name': 'TIKTOK'
+            },
+            Platform.TWITTER: {
+                'color': '#1DA1F2',
+                'icon': '🐦',
+                'name': 'TWITTER'
+            },
+            Platform.YOUTUBE: {
+                'color': '#FF0000',
+                'icon': '📺',
+                'name': 'YOUTUBE'
+            }
+        }
+        
+        config = platform_config.get(platform, {
+            'color': '#6B7280',
+            'icon': '🎬',
+            'name': 'VIDEO'
+        })
+        
+        # Truncate title for thumbnail
+        display_title = (title[:30] + "...") if len(title) > 30 else title
+        score = int(viral_score) if viral_score else 0
+        
+        # Generate clean SVG
+        svg_content = f'''<svg width="400" height="225" xmlns="http://www.w3.org/2000/svg">
+            <rect width="400" height="225" fill="{config['color']}"/>
+            <rect x="0" y="0" width="400" height="225" fill="url(#grad1)" opacity="0.1"/>
+            <defs>
+                <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" style="stop-color:white;stop-opacity:0.3" />
+                    <stop offset="100%" style="stop-color:white;stop-opacity:0" />
+                </linearGradient>
+            </defs>
+            <text x="200" y="80" text-anchor="middle" fill="white" font-size="40" font-weight="bold">{config['icon']}</text>
+            <text x="200" y="110" text-anchor="middle" fill="white" font-size="20" font-weight="bold">{config['name']}</text>
+            <text x="200" y="135" text-anchor="middle" fill="white" font-size="16" opacity="0.9">Viral Score: {score}</text>
+            <text x="200" y="160" text-anchor="middle" fill="white" font-size="12" opacity="0.7">VIRAL DAILY</text>
+            <rect x="10" y="190" width="380" height="25" fill="rgba(255,255,255,0.1)" rx="5"/>
+            <text x="200" y="207" text-anchor="middle" fill="white" font-size="11" opacity="0.8">{display_title}</text>
+        </svg>'''
+        
+        # Return as data URI
+        return f"data:image/svg+xml;charset=utf-8,{quote(svg_content)}"
 
     async def fetch_youtube_viral_videos(self, limit: int = 10) -> List[ViralVideo]:
         """Fetch real viral videos from YouTube"""
