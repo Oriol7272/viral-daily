@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Complete PayPal integration for payment processing in Viral Daily application"
+user_problem_statement: "Resolve 'web not loading' issue and get Viral Daily application running properly with video aggregation and PayPal integration"
 
 backend:
   - task: "PayPal payment integration backend API endpoints"
