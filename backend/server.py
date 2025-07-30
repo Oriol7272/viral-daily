@@ -356,16 +356,19 @@ class VideoAggregator:
         
         videos = []
         for i in range(limit):
+            viral_score = 80.0 - i * 1.8
+            title = twitter_titles[i % len(twitter_titles)]
+            
             video = ViralVideo(
-                title=twitter_titles[i % len(twitter_titles)],
+                title=title,
                 url=f"https://twitter.com/viraltweets/status/17{i+1:014d}",
-                thumbnail="", # Will trigger fallback to SVG placeholder
+                thumbnail=self.generate_platform_thumbnail(Platform.TWITTER, viral_score, title),
                 platform=Platform.TWITTER,
                 views=2000000 + i * 150000,
                 likes=100000 + i * 8000,
                 shares=25000 + i * 2000,
                 author=f"@twitteruser{i+1}",
-                viral_score=80.0 - i * 1.8,
+                viral_score=viral_score,
                 published_at=datetime.utcnow() - timedelta(hours=i * 3)
             )
             videos.append(video)
