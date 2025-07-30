@@ -261,6 +261,239 @@ class ViralDailyAPITester:
         
         return not instagram_found
 
+    def test_thumbnail_generation_comprehensive(self):
+        """Comprehensive test for thumbnail generation fixes - TikTok and Twitter focus"""
+        print(f"\n🖼️  COMPREHENSIVE THUMBNAIL GENERATION TESTING...")
+        
+        all_passed = True
+        
+        # Test 1: Get all videos and verify NO empty thumbnails
+        success, response = self.run_test(
+            "All Videos - Thumbnail Verification",
+            "GET",
+            "videos",
+            200,
+            params={'limit': 30}
+        )
+        
+        if success and isinstance(response, dict):
+            videos = response.get('videos', [])
+            print(f"   Testing {len(videos)} videos for thumbnail quality...")
+            
+            empty_thumbnails = []
+            invalid_thumbnails = []
+            platform_thumbnails = {'youtube': [], 'tiktok': [], 'twitter': []}
+            
+            for video in videos:
+                thumbnail = video.get('thumbnail', '')
+                platform = video.get('platform', '').lower()
+                title = video.get('title', 'No title')[:50]
+                
+                # Check for empty thumbnails
+                if not thumbnail or thumbnail.strip() == '':
+                    empty_thumbnails.append(f"{platform}: {title}")
+                    all_passed = False
+                    continue
+                
+                # Categorize by platform
+                if platform in platform_thumbnails:
+                    platform_thumbnails[platform].append({
+                        'title': title,
+                        'thumbnail': thumbnail,
+                        'viral_score': video.get('viral_score', 0)
+                    })
+                
+                # Check thumbnail format
+                if not (thumbnail.startswith('http') or thumbnail.startswith('data:')):
+                    invalid_thumbnails.append(f"{platform}: {title} - {thumbnail[:50]}")
+            
+            # Report empty thumbnails
+            if empty_thumbnails:
+                print(f"   ❌ CRITICAL: {len(empty_thumbnails)} videos have EMPTY thumbnails!")
+                for empty in empty_thumbnails[:5]:  # Show first 5
+                    print(f"      - {empty}")
+                all_passed = False
+            else:
+                print(f"   ✅ NO EMPTY THUMBNAILS - All {len(videos)} videos have thumbnails")
+            
+            # Report invalid thumbnails
+            if invalid_thumbnails:
+                print(f"   ❌ {len(invalid_thumbnails)} videos have invalid thumbnail formats!")
+                for invalid in invalid_thumbnails[:3]:
+                    print(f"      - {invalid}")
+                all_passed = False
+            else:
+                print(f"   ✅ All thumbnails have valid formats (HTTP URLs or data URIs)")
+            
+            # Test platform-specific thumbnail generation
+            self._test_platform_thumbnails(platform_thumbnails)
+            
+        return all_passed
+    
+    def _test_platform_thumbnails(self, platform_thumbnails):
+        """Test platform-specific thumbnail characteristics"""
+        print(f"\n   🎨 PLATFORM-SPECIFIC THUMBNAIL TESTING...")
+        
+        # Test TikTok thumbnails
+        tiktok_videos = platform_thumbnails.get('tiktok', [])
+        if tiktok_videos:
+            print(f"   📱 TikTok Thumbnails ({len(tiktok_videos)} videos):")
+            svg_count = 0
+            black_themed_count = 0
+            music_icon_count = 0
+            
+            for video in tiktok_videos[:5]:  # Test first 5
+                thumbnail = video['thumbnail']
+                if thumbnail.startswith('data:image/svg+xml'):
+                    svg_count += 1
+                    # Decode and check content
+                    try:
+                        from urllib.parse import unquote
+                        svg_content = unquote(thumbnail.split(',')[1])
+                        if '#000000' in svg_content or 'fill="black"' in svg_content:
+                            black_themed_count += 1
+                        if '🎵' in svg_content or 'music' in svg_content.lower():
+                            music_icon_count += 1
+                    except:
+                        pass
+                    
+                    print(f"      ✅ {video['title'][:30]}... - SVG thumbnail (Score: {video['viral_score']:.1f})")
+                else:
+                    print(f"      ⚠️  {video['title'][:30]}... - Non-SVG thumbnail: {thumbnail[:50]}")
+            
+            print(f"      📊 TikTok Results: {svg_count}/{len(tiktok_videos[:5])} SVG, {black_themed_count} black-themed, {music_icon_count} with music icons")
+            
+            if svg_count == len(tiktok_videos[:5]):
+                print(f"      ✅ ALL TikTok videos have SVG thumbnails!")
+            else:
+                print(f"      ❌ Some TikTok videos missing SVG thumbnails")
+        else:
+            print(f"   📱 TikTok: No videos found for thumbnail testing")
+        
+        # Test Twitter thumbnails
+        twitter_videos = platform_thumbnails.get('twitter', [])
+        if twitter_videos:
+            print(f"   🐦 Twitter Thumbnails ({len(twitter_videos)} videos):")
+            svg_count = 0
+            blue_themed_count = 0
+            bird_icon_count = 0
+            
+            for video in twitter_videos[:5]:  # Test first 5
+                thumbnail = video['thumbnail']
+                if thumbnail.startswith('data:image/svg+xml'):
+                    svg_count += 1
+                    # Decode and check content
+                    try:
+                        from urllib.parse import unquote
+                        svg_content = unquote(thumbnail.split(',')[1])
+                        if '#1DA1F2' in svg_content or 'blue' in svg_content.lower():
+                            blue_themed_count += 1
+                        if '🐦' in svg_content or 'bird' in svg_content.lower():
+                            bird_icon_count += 1
+                    except:
+                        pass
+                    
+                    print(f"      ✅ {video['title'][:30]}... - SVG thumbnail (Score: {video['viral_score']:.1f})")
+                else:
+                    print(f"      ⚠️  {video['title'][:30]}... - Non-SVG thumbnail: {thumbnail[:50]}")
+            
+            print(f"      📊 Twitter Results: {svg_count}/{len(twitter_videos[:5])} SVG, {blue_themed_count} blue-themed, {bird_icon_count} with bird icons")
+            
+            if svg_count == len(twitter_videos[:5]):
+                print(f"      ✅ ALL Twitter videos have SVG thumbnails!")
+            else:
+                print(f"      ❌ Some Twitter videos missing SVG thumbnails")
+        else:
+            print(f"   🐦 Twitter: No videos found for thumbnail testing")
+        
+        # Test YouTube thumbnails (should still have original URLs)
+        youtube_videos = platform_thumbnails.get('youtube', [])
+        if youtube_videos:
+            print(f"   📺 YouTube Thumbnails ({len(youtube_videos)} videos):")
+            http_count = 0
+            ytimg_count = 0
+            
+            for video in youtube_videos[:5]:  # Test first 5
+                thumbnail = video['thumbnail']
+                if thumbnail.startswith('http'):
+                    http_count += 1
+                    if 'ytimg.com' in thumbnail or 'youtube.com' in thumbnail:
+                        ytimg_count += 1
+                    print(f"      ✅ {video['title'][:30]}... - HTTP thumbnail (Score: {video['viral_score']:.1f})")
+                else:
+                    print(f"      ⚠️  {video['title'][:30]}... - Non-HTTP thumbnail: {thumbnail[:50]}")
+            
+            print(f"      📊 YouTube Results: {http_count}/{len(youtube_videos[:5])} HTTP URLs, {ytimg_count} from YouTube CDN")
+            
+            if http_count == len(youtube_videos[:5]):
+                print(f"      ✅ ALL YouTube videos have HTTP thumbnails!")
+            else:
+                print(f"      ❌ Some YouTube videos missing HTTP thumbnails")
+        else:
+            print(f"   📺 YouTube: No videos found for thumbnail testing")
+
+    def test_platform_specific_thumbnails(self):
+        """Test each platform individually for thumbnail generation"""
+        print(f"\n🎯 PLATFORM-SPECIFIC THUMBNAIL TESTING...")
+        
+        platforms = ['tiktok', 'twitter', 'youtube']
+        all_passed = True
+        
+        for platform in platforms:
+            print(f"\n   Testing {platform.upper()} thumbnails...")
+            
+            success, response = self.run_test(
+                f"Get {platform.title()} Videos for Thumbnails",
+                "GET",
+                "videos",
+                200,
+                params={'platform': platform, 'limit': 10}
+            )
+            
+            if success and isinstance(response, dict):
+                videos = response.get('videos', [])
+                
+                if not videos:
+                    print(f"      ⚠️  No {platform} videos returned")
+                    continue
+                
+                print(f"      Found {len(videos)} {platform} videos")
+                
+                # Check each video's thumbnail
+                empty_count = 0
+                valid_count = 0
+                
+                for i, video in enumerate(videos[:5]):  # Check first 5
+                    thumbnail = video.get('thumbnail', '')
+                    title = video.get('title', 'No title')[:40]
+                    viral_score = video.get('viral_score', 0)
+                    
+                    if not thumbnail or thumbnail.strip() == '':
+                        print(f"      ❌ Video {i+1}: EMPTY thumbnail - {title}")
+                        empty_count += 1
+                        all_passed = False
+                    else:
+                        print(f"      ✅ Video {i+1}: Valid thumbnail - {title} (Score: {viral_score:.1f})")
+                        valid_count += 1
+                        
+                        # Platform-specific checks
+                        if platform == 'tiktok' and not thumbnail.startswith('data:image/svg+xml'):
+                            print(f"         ⚠️  TikTok should have SVG thumbnail, got: {thumbnail[:50]}")
+                        elif platform == 'twitter' and not thumbnail.startswith('data:image/svg+xml'):
+                            print(f"         ⚠️  Twitter should have SVG thumbnail, got: {thumbnail[:50]}")
+                        elif platform == 'youtube' and not thumbnail.startswith('http'):
+                            print(f"         ⚠️  YouTube should have HTTP thumbnail, got: {thumbnail[:50]}")
+                
+                print(f"      📊 {platform.upper()} Summary: {valid_count} valid, {empty_count} empty thumbnails")
+                
+                if empty_count > 0:
+                    all_passed = False
+            else:
+                print(f"      ❌ Failed to get {platform} videos")
+                all_passed = False
+        
+        return all_passed
+
     def test_user_registration(self):
         """Test POST /api/users/register - User registration"""
         test_email = f"test_{uuid.uuid4().hex[:8]}@example.com"
