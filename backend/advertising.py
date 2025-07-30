@@ -138,7 +138,7 @@ class AdvertisingService:
                 "image_url": "https://via.placeholder.com/300x200/E91E63/FFFFFF?text=Influencer+Marketing",
                 "click_url": "https://example.com/influencer-marketing",
                 "advertiser": "InfluenceHub",
-                "target_platforms": ["instagram", "youtube"],
+                "target_platforms": ["youtube"],
                 "budget": 2000.0,
                 "cost_per_click": 1.25,
                 "is_active": True
