@@ -394,38 +394,7 @@ class VideoAggregator:
         videos.sort(key=lambda x: x.viral_score, reverse=True)
         return videos
 
-    async def fetch_instagram_viral_videos(self, limit: int = 10) -> List[ViralVideo]:
-        """Fetch viral videos from Instagram - Enhanced mock data"""
-        videos = []
-        
-        instagram_titles = [
-            "This Reel is giving main character energy ✨",
-            "POV: You're living your best life",
-            "The aesthetic is immaculate 📸",
-            "This trend but make it fashion 💫",
-            "Caught in 4K being absolutely iconic",
-            "The vibes are unmatched in this one",
-            "This Reel said 'I'm that girl' 💅",
-            "When the algorithm knows exactly what you need",
-            "This is peak content creation right here",
-            "The way this Reel understood the assignment"
-        ]
-        
-        for i in range(limit):
-            video = ViralVideo(
-                title=instagram_titles[i % len(instagram_titles)],
-                url=f"https://www.instagram.com/reel/C{i+1:010d}/",
-                thumbnail="", # Will trigger fallback to SVG placeholder
-                platform=Platform.INSTAGRAM,
-                views=3000000 + i * 180000,
-                likes=180000 + i * 9000,
-                author=f"@instagrammer{i+1}",
-                viral_score=88.0 - i * 2.2,
-                published_at=datetime.utcnow() - timedelta(hours=i * 1.5)
-            )
-            videos.append(video)
-            
-        return videos
+
 
     async def get_aggregated_viral_videos(self, limit: int = 40, user: Optional[User] = None) -> List[ViralVideo]:
         """Get viral videos from all platforms and sort by viral score"""
