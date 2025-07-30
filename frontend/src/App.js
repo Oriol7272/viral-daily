@@ -52,8 +52,7 @@ const VideoCard = ({ video }) => {
     const colors = {
       youtube: 'border-red-500 bg-red-50',
       tiktok: 'border-black bg-gray-50',
-      twitter: 'border-blue-500 bg-blue-50',
-      instagram: 'border-pink-500 bg-pink-50'
+      twitter: 'border-blue-500 bg-blue-50'
     };
     return colors[platform] || 'border-gray-500 bg-gray-50';
   };
