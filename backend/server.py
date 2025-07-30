@@ -320,16 +320,19 @@ class VideoAggregator:
         
         # Use data URIs for TikTok thumbnails to avoid external dependencies
         for i in range(limit):
+            viral_score = 85.0 - i * 1.5
+            title = tiktok_titles[i % len(tiktok_titles)]
+            
             video = ViralVideo(
-                title=tiktok_titles[i % len(tiktok_titles)],
+                title=title,
                 url=f"https://www.tiktok.com/@viraluser{i+1}/video/7{i+1:012d}",
-                thumbnail="", # Will trigger fallback to SVG placeholder
+                thumbnail=self.generate_platform_thumbnail(Platform.TIKTOK, viral_score, title),
                 platform=Platform.TIKTOK,
                 views=5000000 + i * 200000,
                 likes=250000 + i * 10000,
                 author=f"@tiktoker{i+1}",
                 duration=f"0:{15+i:02d}",
-                viral_score=85.0 - i * 1.5,
+                viral_score=viral_score,
                 published_at=datetime.utcnow() - timedelta(hours=i * 2)
             )
             videos.append(video)
