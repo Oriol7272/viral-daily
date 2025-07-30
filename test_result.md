@@ -102,7 +102,7 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Resolve 'web not loading' issue and get Viral Daily application running properly with video aggregation and PayPal integration"
+user_problem_statement: "Remove Instagram support and verify YouTube, TikTok, and X (Twitter) platforms work correctly. Test payment methods and ads functionality."
 
 backend:
   - task: "Fix startup validation error in Advertisement model"
