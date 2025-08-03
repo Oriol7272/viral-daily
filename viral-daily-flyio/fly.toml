@@ -1,0 +1,28 @@
+app = "viral-daily-oriol-2025"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[http_service.checks]]
+  grace_period = "10s"
+  interval = "30s"
+  method = "GET"
+  timeout = "5s"
+  path = "/api/health"
+
+[env]
+  SERVER_MODE = "flyio_production"
+
+[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 256
+  min_machines_running = 1  # Add this line - keeps 1 machine always running
